@@ -1,7 +1,0 @@
-{
-  "extends": "@wdk-account-abstraction-ton/typescript-config/library.json",
-  "exclude": ["dist", "build", "node_modules"],
-  "compilerOptions": {
-    "outDir": "dist"
-  }
-}

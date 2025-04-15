@@ -1,5 +1,0 @@
-{
-  "types": "../dist/v1.d.ts",
-  "module": "../dist/v1.mjs",
-  "main": "../dist/v1.cjs"
-}
