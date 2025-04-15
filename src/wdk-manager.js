@@ -1,12 +1,12 @@
-import { WDKWalletManagementEVM } from "@wdk/wallet-evm";
-import { WDKAccountAbstractionEVM } from "@wdk/account-abstraction-evm";
+import { WDKWalletManagementEVM } from '@wdk/wallet-evm'
+import { WDKAccountAbstractionEVM } from '@wdk/account-abstraction-evm'
 
-import { WDKWalletManagementTON } from "@wdk/wallet-ton";
-import { WDKAccountAbstractionTON } from "@wdk/account-abstraction-ton";
+import { WDKWalletManagementTON } from '@wdk/wallet-ton'
+import { WDKAccountAbstractionTON } from '@wdk/account-abstraction-ton'
 
-import bip39 from "bip39";
+import bip39 from 'bip39'
 
-//#region Type definitions
+// #region Type definitions
 
 /**
  * A [BIP-39](https://www.blockplate.com/pages/bip-39-wordlist?srsltid=AfmBOopD-bEKe3mCjbMRpQu-OZlnYK3b28y7IQb5k6XbKsnI1gZFxL9j) seed phrase.
@@ -44,10 +44,10 @@ import bip39 from "bip39";
 /**
  * An object containing the account abstraction configuration for the ton blockchain.
  * @typedef {Object} AccountAbstractionConfigTon
- * @property {string} tonApiKey - 
- * @property {string} tonApiEndpoint - 
- * @property {string} tonCenterApiKey - 
- * @property {string} tonCenterEndpoint - 
+ * @property {string} tonApiKey -
+ * @property {string} tonApiEndpoint -
+ * @property {string} tonCenterApiKey -
+ * @property {string} tonCenterEndpoint -
  * @property {Object} paymasterToken -
  * @property {string} paymasterToken.address -
  */
@@ -95,81 +95,80 @@ import bip39 from "bip39";
  * @property {number} bridgeCost - The bridge cost in usdt tokens.
  */
 
-//#endregion
+// #endregion
 
 const EVM_BLOCKCHAINS = [
-    "ethereum",
-    "arbitrum",
-    "polygon"
+  'ethereum',
+  'arbitrum',
+  'polygon'
 ]
 
 const SUPPORTED_BLOCKCHAINS = [
-    ...EVM_BLOCKCHAINS,
-    "ton"
+  ...EVM_BLOCKCHAINS,
+  'ton'
 ]
 
 export default class WdkManager {
-    #seed;
-    #accountAbstractionsManagers;
+  #seed
+  #accountAbstractionsManagers
 
-    /**
+  /**
      * Creates a new wallet development kit manager.
-     * 
+     *
      * @param {SeedPhrase | Seeds} seed - A [BIP-39](https://www.blockplate.com/pages/bip-39-wordlist?srsltid=AfmBOopD-bEKe3mCjbMRpQu-OZlnYK3b28y7IQb5k6XbKsnI1gZFxL9j) seed phrase to use for all blockchains, or an object mapping each blockchain to a different seed phrase.
      * @param {AccountAbstractionConfig} accountAbstractionConfig - The account abstraction configuration for each blockchain.
      */
-    constructor(seed, accountAbstractionConfig) {
-        this.#seed = seed;
+  constructor (seed, accountAbstractionConfig) {
+    this.#seed = seed
 
-        this.#accountAbstractionsManagers = { }
+    this.#accountAbstractionsManagers = { }
 
-        for (const blockchain of EVM_BLOCKCHAINS) {
-            const config = accountAbstractionConfig[blockchain];
+    for (const blockchain of EVM_BLOCKCHAINS) {
+      const config = accountAbstractionConfig[blockchain]
 
-            if (config)
-                this.#accountAbstractionsManagers[blockchain] = new WDKAccountAbstractionEVM(config.rpc, config.safe);
-        }
-
-        const config = accountAbstractionConfig["ton"];
-
-        this.#accountAbstractionsManagers["ton"] = new WDKAccountAbstractionTON(config);
+      if (config) { this.#accountAbstractionsManagers[blockchain] = new WDKAccountAbstractionEVM(config.rpc, config.safe) }
     }
 
-    /**
+    const config = accountAbstractionConfig.ton
+
+    this.#accountAbstractionsManagers.ton = new WDKAccountAbstractionTON(config)
+  }
+
+  /**
      * Returns the abstracted address of an account.
-     * 
+     *
      * @param {string} blockchain - A blockchain identifier (e.g., "ethereum").
      * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
      * @returns {Promise<string>} The abstracted address.
-     * 
+     *
      * @example
      * // Get the abstracted address of the ethereum wallet's account at m/44'/60'/0'/0/3
      * const abstractedAddress = await wdk.getAbstractedAddress("ethereum", 3);
      */
-    async getAbstractedAddress(blockchain, accountIndex) {
-        const accountInfo = await this.#getAccountInfo(blockchain, accountIndex);
+  async getAbstractedAddress (blockchain, accountIndex) {
+    const accountInfo = await this.#getAccountInfo(blockchain, accountIndex)
 
-        const manager = this.#accountAbstractionsManagers[blockchain];
+    const manager = this.#accountAbstractionsManagers[blockchain]
 
-        if (this.#isEvmBlockchain(blockchain)) {
-            const safe4337Pack = await manager.getSafe4337Pack(accountInfo);
-    
-            return await manager.getAbstractedAddress(safe4337Pack);
-        }
+    if (this.#isEvmBlockchain(blockchain)) {
+      const safe4337Pack = await manager.getSafe4337Pack(accountInfo)
 
-        if (blockchain == "ton") {
-            return accountInfo.address;
-        }
+      return await manager.getAbstractedAddress(safe4337Pack)
     }
 
-    /**
+    if (blockchain == 'ton') {
+      return accountInfo.address
+    }
+  }
+
+  /**
      * Transfers a token to another address.
-     * 
+     *
      * @param {string} blockchain - A blockchain identifier (e.g., "ethereum").
      * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
      * @param {TransferOptions} options - The transfer's options.
      * @returns {Promise<TransferResult>} The transfer's result.
-     * 
+     *
      * @example
      * // Transfer 1.0 USDT from the ethereum wallet's account at index 0 to another address
      * const transfer = await wdk.transfer("ethereum", 0, {
@@ -177,40 +176,40 @@ export default class WdkManager {
      *     token: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
      *     amount: 1_000_000
      * });
-     * 
+     *
      * console.log("Transaction hash:", transfer.hash);
      */
-    async transfer(blockchain, accountIndex, options) {
-        const accountInfo = await this.#getAccountInfo(blockchain, accountIndex);
+  async transfer (blockchain, accountIndex, options) {
+    const accountInfo = await this.#getAccountInfo(blockchain, accountIndex)
 
-        const manager = this.#accountAbstractionsManagers[blockchain];
+    const manager = this.#accountAbstractionsManagers[blockchain]
 
-        if (this.#isEvmBlockchain(blockchain)) {
-            return await manager.send({
-                ...options,
-                safe4337Pack: await manager.getSafe4337Pack(accountInfo)
-            });
-        }
-
-        if (blockchain == "ton") {
-            return await manager.send({
-                ...accountInfo,
-                recipient: options.recipient,
-                amount: options.amount,
-                jettonMaster: options.token
-            });
-        }
+    if (this.#isEvmBlockchain(blockchain)) {
+      return await manager.send({
+        ...options,
+        safe4337Pack: await manager.getSafe4337Pack(accountInfo)
+      })
     }
 
-    /**
+    if (blockchain == 'ton') {
+      return await manager.send({
+        ...accountInfo,
+        recipient: options.recipient,
+        amount: options.amount,
+        jettonMaster: options.token
+      })
+    }
+  }
+
+  /**
      * Quotes the costs of a transfer operation.
-     * 
+     *
      * @see {@link transfer}
      * @param {string} blockchain - A blockchain identifier (e.g., "ethereum").
      * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
      * @param {TransferOptions} options - The transfer's options.
      * @returns {Promise<Omit<TransferResult, "hash">>} The transfer's quotes.
-     * 
+     *
      * @example
      * // Quote the transfer of 1.0 USDT from the ethereum wallet's account at index 0 to another address
      * const quote = await wdk.quoteTransfer("ethereum", 0, {
@@ -218,212 +217,207 @@ export default class WdkManager {
      *     token: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
      *     amount: 1_000_000
      * });
-     * 
+     *
      * console.log("Gas cost (in paymaster token):", quote.gasCost);
      */
-    async quoteTransfer(blockchain, accountIndex, options) {
-        const accountInfo = await this.#getAccountInfo(blockchain, accountIndex);
+  async quoteTransfer (blockchain, accountIndex, options) {
+    const accountInfo = await this.#getAccountInfo(blockchain, accountIndex)
 
-        const manager = this.#accountAbstractionsManagers[blockchain];
+    const manager = this.#accountAbstractionsManagers[blockchain]
 
-        if (this.#isEvmBlockchain(blockchain)) {
-            const { success, ...quote } = await manager.quoteSend({
-                ...options,
-                safe4337Pack: await manager.getSafe4337Pack(accountInfo)
-            });
+    if (this.#isEvmBlockchain(blockchain)) {
+      const { success, ...quote } = await manager.quoteSend({
+        ...options,
+        safe4337Pack: await manager.getSafe4337Pack(accountInfo)
+      })
 
-            if (!success)
-                throw new Error("Quote error:", quote.details);
+      if (!success) { throw new Error('Quote error:', quote.details) }
 
-            return quote;
-        }
-
-        if (blockchain == "ton") {
-            const { success, ...quote } = await manager.quoteSend({
-                ...accountInfo,
-                recipient: options.recipient,
-                amount: options.amount,
-                jettonMaster: options.token
-            });
-
-            if (!success)
-                throw new Error("Quote error:", quote.details);
-
-            return quote;
-        }
+      return quote
     }
 
-    /**
+    if (blockchain == 'ton') {
+      const { success, ...quote } = await manager.quoteSend({
+        ...accountInfo,
+        recipient: options.recipient,
+        amount: options.amount,
+        jettonMaster: options.token
+      })
+
+      if (!success) { throw new Error('Quote error:', quote.details) }
+
+      return quote
+    }
+  }
+
+  /**
      * Swaps a pair of tokens.
-     * 
+     *
      * @param {string} blockchain - A blockchain identifier (e.g., "ethereum").
      * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
      * @param {SwapOptions} options - The swap's options.
      * @returns {Promise<SwapResult>} The swap's result.
      */
-    async swap(blockchain, accountIndex, options) {
-        const accountInfo = await this.#getAccountInfo(blockchain, accountIndex);
+  async swap (blockchain, accountIndex, options) {
+    const accountInfo = await this.#getAccountInfo(blockchain, accountIndex)
 
-        const manager = this.#accountAbstractionsManagers[blockchain];
+    const manager = this.#accountAbstractionsManagers[blockchain]
 
-        if (this.#isEvmBlockchain(blockchain)) {
-            return await manager.swap({
-                ...options,
-                safe4337Pack: await manager.getSafe4337Pack(accountInfo)
-            });
-        }
-
-        if (blockchain == "ton") {
-            throw new Error("Ton does not support gasless swaps yet.")
-        }
+    if (this.#isEvmBlockchain(blockchain)) {
+      return await manager.swap({
+        ...options,
+        safe4337Pack: await manager.getSafe4337Pack(accountInfo)
+      })
     }
 
-    /**
+    if (blockchain == 'ton') {
+      throw new Error('Ton does not support gasless swaps yet.')
+    }
+  }
+
+  /**
      * Quotes the costs of a swap operation.
-     * 
+     *
      * @see {@link swap}
      * @param {string} blockchain - A blockchain identifier (e.g., "ethereum").
      * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
      * @param {SwapOptions} options - The swap's options.
      * @returns {Promise<Omit<SwapResult, "hash">>} The swap's quotes.
      */
-    async quoteSwap(blockchain, accountIndex, options) {
-        const accountInfo = await this.#getAccountInfo(blockchain, accountIndex);
+  async quoteSwap (blockchain, accountIndex, options) {
+    const accountInfo = await this.#getAccountInfo(blockchain, accountIndex)
 
-        const manager = this.#accountAbstractionsManagers[blockchain];
+    const manager = this.#accountAbstractionsManagers[blockchain]
 
-        if (this.#isEvmBlockchain(blockchain)) {
-            const { success, ...quote } = await manager.quoteSwap({
-                ...options,
-                safe4337Pack: await manager.getSafe4337Pack(accountInfo)
-            });
+    if (this.#isEvmBlockchain(blockchain)) {
+      const { success, ...quote } = await manager.quoteSwap({
+        ...options,
+        safe4337Pack: await manager.getSafe4337Pack(accountInfo)
+      })
 
-            if (!success)
-                throw new Error("Quote error:", quote.details);
+      if (!success) { throw new Error('Quote error:', quote.details) }
 
-            return quote;
-        }
-
-        if (blockchain == "ton") {
-            throw new Error("Ton does not support gasless swaps yet.")
-        }
+      return quote
     }
 
-    /**
+    if (blockchain == 'ton') {
+      throw new Error('Ton does not support gasless swaps yet.')
+    }
+  }
+
+  /**
      * Bridges usdt tokens to a different blockchain.
-     * 
+     *
      * @param {string} blockchain - A blockchain identifier (e.g., "ethereum").
      * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
      * @param {BridgeOptions} options - The bridge's options.
      * @returns {Promise<BridgeResult>} The bridge's result.
      */
-    async bridge(blockchain, accountIndex, options) {
-        const accountInfo = await this.#getAccountInfo(blockchain, accountIndex);
+  async bridge (blockchain, accountIndex, options) {
+    const accountInfo = await this.#getAccountInfo(blockchain, accountIndex)
 
-        const manager = this.#accountAbstractionsManagers[blockchain];
+    const manager = this.#accountAbstractionsManagers[blockchain]
 
-        if (this.#isEvmBlockchain(blockchain)) {
-            return await manager.bridge({
-                ...options,
-                sourceChain: blockchain,
-                safe4337Pack: await manager.getSafe4337Pack(accountInfo)
-            });
-        }
-
-        if (blockchain == "ton") {
-            return await manager.bridge({
-                ...options,
-                ...accountInfo
-            });
-        }
+    if (this.#isEvmBlockchain(blockchain)) {
+      return await manager.bridge({
+        ...options,
+        sourceChain: blockchain,
+        safe4337Pack: await manager.getSafe4337Pack(accountInfo)
+      })
     }
 
-    /**
+    if (blockchain == 'ton') {
+      return await manager.bridge({
+        ...options,
+        ...accountInfo
+      })
+    }
+  }
+
+  /**
      * Quotes the costs of a bridge operation.
-     * 
+     *
      * @see {@link bridge}
      * @param {string} blockchain - A blockchain identifier (e.g., "ethereum").
      * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
      * @param {BridgeOptions} options - The bridge's options.
      * @returns {Promise<Omit<BridgeResult, "hash">>} The bridge's quotes.
      */
-    async quoteBridge(blockchain, accountIndex, options) {
-        const accountInfo = await this.#getAccountInfo(blockchain, accountIndex);
+  async quoteBridge (blockchain, accountIndex, options) {
+    const accountInfo = await this.#getAccountInfo(blockchain, accountIndex)
 
-        const manager = this.#accountAbstractionsManagers[blockchain];
+    const manager = this.#accountAbstractionsManagers[blockchain]
 
-        if (this.#isEvmBlockchain(blockchain)) {
-            const { success, ...quote } = await manager.quoteBridge({
-                ...options,
-                sourceChain: blockchain,
-                safe4337Pack: await manager.getSafe4337Pack(accountInfo)
-            });
+    if (this.#isEvmBlockchain(blockchain)) {
+      const { success, ...quote } = await manager.quoteBridge({
+        ...options,
+        sourceChain: blockchain,
+        safe4337Pack: await manager.getSafe4337Pack(accountInfo)
+      })
 
-            if (!success)
-                throw new Error("Quote error:", quote.details);
+      if (!success) { throw new Error('Quote error:', quote.details) }
 
-            return quote;
-        }
-
-        if (blockchain == "ton") {
-            const { success, ...quote } = await manager.quoteBridge({
-                ...options,
-                ...accountInfo
-            });
-
-            if (!success)
-                throw new Error("Quote error:", quote.details);
-
-            return quote;
-        }
+      return quote
     }
 
-    /**
+    if (blockchain == 'ton') {
+      const { success, ...quote } = await manager.quoteBridge({
+        ...options,
+        ...accountInfo
+      })
+
+      if (!success) { throw new Error('Quote error:', quote.details) }
+
+      return quote
+    }
+  }
+
+  /**
      * Returns a random [BIP-39](https://www.blockplate.com/pages/bip-39-wordlist?srsltid=AfmBOopD-bEKe3mCjbMRpQu-OZlnYK3b28y7IQb5k6XbKsnI1gZFxL9j) seed phrase.
-     * 
+     *
      * @returns {SeedPhrase} The seed phrase.
-     * 
+     *
      * @example
      * const seed = WdkManager.getRandomSeedPhrase();
-     * 
+     *
      * // Output: atom raven insect ...
      * console.log(seed);
      */
-    static getRandomSeedPhrase() {
-        return bip39.generateMnemonic();
-    }
+  static getRandomSeedPhrase () {
+    return bip39.generateMnemonic()
+  }
 
-    /**
+  /**
      * Checks if a seed phrase is valid.
-     * 
+     *
      * @param {SeedPhrase} seed - The seed phrase.
      * @returns {boolean} True if the seed phrase is valid.
      */
-    static isValidSeedPhrase(seed) {
-        return bip39.validateMnemonic(seed);
+  static isValidSeedPhrase (seed) {
+    return bip39.validateMnemonic(seed)
+  }
+
+  async #getAccountInfo (blockchain, accountIndex) {
+    const seed = this.#seed
+
+    if (this.#isEvmBlockchain(blockchain)) {
+      const manager = new WDKWalletManagementEVM()
+
+      return await manager
+        .createWalletByIndex(typeof seed === 'string' ? seed : seed.evm, accountIndex)
     }
 
-    async #getAccountInfo(blockchain, accountIndex) {
-        const seed = this.#seed;
+    if (blockchain == 'ton') {
+      const manager = new WDKWalletManagementTON()
 
-        if (this.#isEvmBlockchain(blockchain)) {
-            const manager = new WDKWalletManagementEVM();
+      const accountIndexSeed = manager.getSeed(accountIndex)
 
-            return await manager
-                .createWalletByIndex(typeof seed == "string" ? seed : seed.evm, accountIndex);
-        } 
-        
-        if (blockchain == "ton") {
-            const manager = new WDKWalletManagementTON();
-
-            const accountIndexSeed = manager.getSeed(accountIndex);
-
-            return await manager
-                .getWalletDetails(typeof seed == "string" ? seed.split(' ') : seed.ton, accountIndexSeed);
-        }
+      return await manager
+        .getWalletDetails(typeof seed === 'string' ? seed.split(' ') : seed.ton, accountIndexSeed)
     }
+  }
 
-    #isEvmBlockchain(blockchain) {
-        return EVM_BLOCKCHAINS.includes(blockchain);
-    }
+  #isEvmBlockchain (blockchain) {
+    return EVM_BLOCKCHAINS.includes(blockchain)
+  }
 }

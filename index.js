@@ -1,3 +1,3 @@
-import WdkManager from "./src/wdk-manager.js";
+import WdkManager from './src/wdk-manager.js'
 
-export default WdkManager;
+export default WdkManager
