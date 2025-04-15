@@ -1,0 +1,5 @@
+{
+  "types": "../dist/aptos.d.ts",
+  "module": "../dist/aptos.mjs",
+  "main": "../dist/aptos.cjs"
+}

@@ -1,0 +1,5 @@
+{
+  "types": "../dist/solana.d.ts",
+  "module": "../dist/solana.mjs",
+  "main": "../dist/solana.cjs"
+}

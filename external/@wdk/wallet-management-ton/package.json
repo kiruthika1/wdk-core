@@ -1,0 +1,11 @@
+{
+  "name": "@wdk/wallet-management-ton",
+  "version": "1.0.0",
+  "description": "Wallet management utilities for TON",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "@ton/crypto": "^3.3.0",
+    "@ton/ton": "15.1.0"
+  }
+}

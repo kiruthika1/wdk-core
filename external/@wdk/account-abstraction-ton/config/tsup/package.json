@@ -1,0 +1,26 @@
+{
+  "name": "@layerzerolabs/tsup-config",
+  "version": "0.0.4",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "default": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@chialab/esbuild-plugin-commonjs": "^0.17.2",
+    "esbuild": "^0.17.4",
+    "esbuild-node-externals": "^1.7.0",
+    "tsup": "^6.7.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.4"
+  }
+}

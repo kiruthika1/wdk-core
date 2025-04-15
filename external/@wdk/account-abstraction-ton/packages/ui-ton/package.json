@@ -1,0 +1,45 @@
+{
+  "name": "@wdk-account-abstraction-ton/ui-ton",
+  "version": "1.0.0-canary.1",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "require": "./dist/index.cjs",
+    "import": "./dist/index.mjs"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist/**"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "build": "npx tsup",
+    "dev": "npx tsup --watch",
+    "bump": "npm version prerelease --preid=canary",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist && rm yarn.lock"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@layerzerolabs/lz-ton-sdk-v2": "3.0.63",
+    "@ton/core": "0.59.1",
+    "@ton/crypto": "3.3.0",
+    "@ton/ton": "15.1.0",
+    "@wdk-account-abstraction-ton/ui-core": "1.0.0-canary.2",
+    "bigint-buffer": "1.1.5",
+    "buffer": "6.0.3",
+    "fs": "*",
+    "lodash": "4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.16",
+    "@types/node": "^22.14.0",
+    "@wdk-account-abstraction-ton/tsup-config": "0.0.8",
+    "typescript": "^5.0.4"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@wdk/protocol-stargate-evm",
+  "version": "1.0.0",
+  "description": "Allbridge protocol integration for EVM-compatible chains - Transaction data builder for WDK",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "lint": "eslint src/**/*.js"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "ethers": "^6.0.0",
+    "bs58": "^5.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "@wdk/wallet-management-evm",
+  "version": "1.0.0",
+  "description": "Wallet management utilities for EVM chains",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "ethers": "^6.0.0"
+  }
+} 

@@ -1,0 +1,21 @@
+{
+  "ethereum": {
+    "bridgeContractAddress": "0x609c690e8F7D68a59885c9132e812eEbDaAf0c9e",
+    "chainId": "1",
+    "usdtAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+  },
+  "solana": {
+    "chainId": "4",
+    "usdtAddress": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB"
+  },
+  "arbitrum": {
+    "bridgeContractAddress": "0x9Ce3447B58D58e8602B7306316A5fF011B92d189",
+    "chainId": "6",
+    "usdtAddress": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"
+  },
+  "polygon": {
+    "bridgeContractAddress": "0x7775d63836987f444E2F14AA0fA2602204D7D3E0",
+    "chainId": "5",
+    "usdtAddress": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F"
+  }
+}

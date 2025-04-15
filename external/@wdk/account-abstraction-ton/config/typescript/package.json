@@ -1,0 +1,18 @@
+{
+  "name": "@layerzerolabs/typescript-config",
+  "version": "0.0.3",
+  "description": "LayerZero TypeScript Config",
+  "keywords": ["typescript", "config"],
+  "license": "MIT",
+  "files": [
+    "base.json",
+    "hardhat.json",
+    "nextjs.json",
+    "node16.json",
+    "library.json",
+    "react-library.json"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

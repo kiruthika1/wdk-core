@@ -1,0 +1,5 @@
+{
+  "types": "../dist/evm.d.ts",
+  "module": "../dist/evm.mjs",
+  "main": "../dist/evm.cjs"
+}

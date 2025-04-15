@@ -1,0 +1,58 @@
+{
+  "name": "@wdk/account-abstraction-ton",
+  "version": "1.0.0",
+  "description": "Account Abstraction module for TON blockchain",
+  "private": true,
+  "main": "index.js",
+  "types": "index.d.ts",
+  "workspaces": [
+    "packages/*",
+    "config/*"
+  ],
+  "scripts": {
+    "build-core": "turbo run build-core",
+    "build": "turbo run build",
+    "build-solana": "turbo run build-solana",
+    "build-ui-ton": "turbo run build-ui-ton",
+    "build-wallet-ton": "turbo run build-wallet-ton",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "setup": "yarn -W && chmod +x install.sh && ./install.sh"
+  },
+  "dependencies": {
+    "@wdk-account-abstraction-ton/ui-bridge-oft": "file:packages/ui-bridge-oft",
+    "@wdk-account-abstraction-ton/ui-core": "canary",
+    "@wdk-account-abstraction-ton/ui-ton": "canary",
+    "@wdk-account-abstraction-ton/ui-config": "canary",
+    "@wdk-account-abstraction-ton/ui-evm": "canary",
+    "@ston-fi/api": "^0.21.0",
+    "@ston-fi/sdk": "^2.3.0",
+    "@tact-lang/compiler": "^1.6.3",
+    "@ton-api/client": "^0.4.0",
+    "@ton-api/ton-adapter": "^0.4.0",
+    "@ton-community/func-js": "^0.9.1",
+    "@ton/blueprint": "^0.29.0",
+    "@ton/tolk-js": "^0.9.0",
+    "@ton/ton": "15.1.0",
+    "@types/big.js": "^6.2.2",
+    "@types/memory-cache": "^0.2.6",
+    "bip39": "^3.1.0",
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.1",
+    "lodash": "4.17.21",
+    "lodash-es": "^4.17.21",
+    "micro-ed25519-hdkey": "^0.1.2",
+    "react-native-fast-pbkdf2": "^0.3.1",
+    "tonweb": "^0.0.66",
+    "tron-format-address": "0.1.12",
+    "viem": "2.22.10"
+  },
+  "packageManager": "yarn@1.22.22",
+  "resolutions": {
+    "mipd": "0.1.0-canary.20231012T134656"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "^4.17.7",
+    "turbo": "2.3.4"
+  }
+}

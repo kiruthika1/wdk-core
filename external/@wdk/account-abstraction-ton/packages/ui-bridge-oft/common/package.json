@@ -1,0 +1,5 @@
+{
+  "types": "../dist/common.d.ts",
+  "module": "../dist/common.mjs",
+  "main": "../dist/common.cjs"
+}
