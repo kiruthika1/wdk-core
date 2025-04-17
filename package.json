@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "docs": "jsdoc -r . --destination ./docs",
-    "lint": "standard --fix"
+    "lint": "standard",
+    "lint:fix": "standard --fix"
   },
   "dependencies": {
     "@wdk/account-abstraction-evm": "https://github.com/tetherto/wdk-account-abstraction-evm",
