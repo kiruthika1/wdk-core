@@ -2,9 +2,11 @@
   "name": "@wdk/core",
   "version": "0.1.0-beta.1",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "docs": "jsdoc -r ./src --destination ./docs"
+    "docs": "jsdoc -r . --destination ./docs",
+    "lint": "standard --fix"
   },
   "dependencies": {
     "@wdk/account-abstraction-evm": "https://github.com/tetherto/wdk-account-abstraction-evm",
@@ -18,5 +20,5 @@
     "standard": "^17.1.2"
   },
   "author": "Tether",
-  "license": "MIT"
+  "license": "Apache-2.0"
 }
