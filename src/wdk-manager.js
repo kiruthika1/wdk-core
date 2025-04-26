@@ -56,8 +56,8 @@ export const Blockchain = {
 
 export default class WdkManager {
   #accountAbstractionConfig
-
   #wallets
+  #cache
 
   /**
    * @typedef {Object} Seeds
@@ -103,6 +103,8 @@ export default class WdkManager {
         })
       }
     }
+
+    this.#cache = { }
   }
 
   /**
@@ -316,10 +318,14 @@ export default class WdkManager {
       throw new Error(`Unsupported blockchain: ${blockchain}.`)
     }
 
-    const account = this.getAccount(blockchain, accountIndex)
+    if (!this.#cache[[blockchain, accountIndex]]) {
+      const account = this.getAccount(blockchain, accountIndex)
+      const config = this.#accountAbstractionConfig[blockchain]
+      const manager = new ACCOUNT_ABSTRACTION_MANAGERS[blockchain](account, config)
 
-    const config = this.#accountAbstractionConfig[blockchain]
+      this.#cache[[blockchain, accountIndex]] = manager
+    }
 
-    return new ACCOUNT_ABSTRACTION_MANAGERS[blockchain](account, config)
+    return this.#cache[[blockchain, accountIndex]]
   }
 }
