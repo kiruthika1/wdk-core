@@ -21,20 +21,6 @@ import AccountAbstractionManagerTon from '@wdk/account-abstraction-ton'
 
 import bip39 from 'bip39'
 
-/**
- * @typedef {import('@wdk/account-abstraction-evm/src/account-abstraction-manager-evm.js').EvmAccountAbstractionConfig} EvmAccountAbstractionConfig
- */
-
-/**
- * @typedef {import('@wdk/account-abstraction-ton/src/account-abstraction-manager-ton.js').TonAccountAbstractionConfig} TonAccountAbstractionConfig
- */
-
-const EVM_BLOCKCHAINS = [
-  'ethereum',
-  'arbitrum',
-  'polygon'
-]
-
 const ACCOUNT_ABSTRACTION_MANAGERS = {
   ethereum: AccountAbstractionManagerEvm,
   arbitrum: AccountAbstractionManagerEvm,
@@ -44,7 +30,7 @@ const ACCOUNT_ABSTRACTION_MANAGERS = {
 
 /**
  * Enumeration for all available blockchains.
- * 
+ *
  * @enum {string}
  */
 export const Blockchain = {
@@ -53,6 +39,12 @@ export const Blockchain = {
   Polygon: 'polygon',
   Ton: 'ton'
 }
+
+const EVM_BLOCKCHAINS = [
+  Blockchain.Ethereum,
+  Blockchain.Arbitrum,
+  Blockchain.Ton
+]
 
 export default class WdkManager {
   #accountAbstractionConfig
@@ -74,11 +66,39 @@ export default class WdkManager {
    * @property {EvmAccountAbstractionConfig} polygon - The account abstraction configuration for polygon.
    * @property {TonAccountAbstractionConfig} ton - The account abstraction configuration for ton.
    */
-  
+
+  /**
+   * @typedef {Object} EvmAccountAbstractionConfig
+   * @property {string} blockchain - The blockchain’s identifier (e.g., "ethereum").
+   * @property {string} rpcUrl - The url of the rpc provider.
+   * @property {string} bundlerUrl - The url of the bundler service.
+   * @property {string} paymasterUrl - The url of the paymaster service.
+   * @property {string} paymasterAddress - The address of the paymaster smart contract.
+   * @property {string} entryPointAddress - The address of the entry point smart contract.
+   * @property {string} paymasterTokenOracleAddress - The address of the paymaster token oracle.
+   * @property {number} paymasterPremiumOnGasCost - The percentage of the gas cost that the paymaster holds as a premium.
+   * @property {number} minimumAllowanceToPaymaster - Minimum amount of allowance to give to the paymaster.
+   * @property {number} transferMaxFee - Maximum fee amount for transfer operations.
+   * @property {number} swapMaxFee - Maximum fee amount for swap operations.
+   * @property {number} bridgeMaxFee - Maximum fee amount for bridge operations.
+   * @property {Object} paymasterToken - The paymaster token configuration.
+   * @property {string} paymasterToken.address - The address of the paymaster token.
+   */
+
+  /**
+   * @typedef {Object} TonAccountAbstractionConfig
+   * @property {string} tonApiUrl - The ton api's url.
+   * @property {string} tonApiSecretKey - The api-key to use to authenticate on the ton api.
+   * @property {string} tonCenterUrl - The ton center api's url.
+   * @property {string} tonCenterSecretKey - The api-key to use to authenticate on the ton center api.
+   * @property {Object} paymasterToken - The paymaster token configuration.
+   * @property {string} paymasterToken.address - The address of the paymaster token.
+   */
+
   /**
    * Creates a new wallet development kit manager.
    *
-   * @param {string | Seeds} seed - A [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) seed phrase to use for 
+   * @param {string | Seeds} seed - A [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) seed phrase to use for
    *                                all blockchains, or an object mapping each blockchain to a different seed phrase.
    * @param {AccountAbstractionConfig} accountAbstractionConfig - The account abstraction configuration for each blockchain.
    */
@@ -91,15 +111,14 @@ export default class WdkManager {
       const seedPhrase = typeof seed === 'string' ? seed : seed[blockchain]
 
       if (EVM_BLOCKCHAINS.includes(blockchain)) {
-        this.#wallets[blockchain] = new WalletManagerEvm(seedPhrase, { 
-          rpcUrl: accountAbstractionConfig[blockchain]?.rpcUrl 
+        this.#wallets[blockchain] = new WalletManagerEvm(seedPhrase, {
+          rpcUrl: accountAbstractionConfig[blockchain]?.rpcUrl
         })
       }
-
-      if (blockchain == 'ton') {
+      else if (blockchain === 'ton') {
         this.#wallets.ton = new WalletManagerTon(seedPhrase, {
           tonApiUrl: accountAbstractionConfig.ton?.tonApiUrl,
-          tonApiSecretKey: accountAbstractionConfig.ton?.tonApiSecretKey,
+          tonApiSecretKey: accountAbstractionConfig.ton?.tonApiSecretKey
         })
       }
     }
@@ -123,18 +142,18 @@ export default class WdkManager {
   }
 
   /**
-     * Checks if a seed phrase is valid.
-     *
-     * @param {string} seed - The seed phrase.
-     * @returns {boolean} True if the seed phrase is valid.
-     */
+   * Checks if a seed phrase is valid.
+   *
+   * @param {string} seed - The seed phrase.
+   * @returns {boolean} True if the seed phrase is valid.
+   */
   static isValidSeedPhrase (seed) {
     return bip39.validateMnemonic(seed)
   }
 
   /**
    * Returns the wallet account for a specific blockchain and index (see [BIP-44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki)).
-   * 
+   *
    * @example
    * // Return the account for the ethereum blockchain with derivation path m/44'/60'/0'/0/1
    * const account = wdk.getAccount("ethereum", 1);
