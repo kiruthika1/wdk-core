@@ -152,6 +152,52 @@ export default class WdkManager {
   }
 
   /**
+   * @typedef {Object} WalletAccount
+   * @property {string} path - The derivation path of this account (see [BIP-44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki)).
+   * @property {number} index - The derivation path's index of this account.
+   * @property {string} address - The account’s address.
+   * @property {KeyPair} keyPair - The account’s key pair.
+   * @property {Sign} sign
+   * @property {Verify} verify
+   * @property {SendTransaction} sendTransaction
+   */
+
+  /**
+   * @typedef {Object} KeyPair
+   * @property {string} publicKey - The public key.
+   * @property {string} privateKey - The private key.
+   */
+
+  /**
+   * Signs a message.
+   * @callback Sign
+   * @param {string} message - The message to sign.
+   * @returns {Promise<string>} The message's signature.
+   */
+
+  /**
+   * Verifies a message's signature.
+   * @callback Verify
+   * @param {string} message - The original message.
+   * @param {string} signature - The signature to verify.
+   * @returns {Promise<boolean>} True if the signature is valid.
+   */
+
+  /**
+   * @typedef {Object} Transaction
+   * @property {string} to - The transaction's recipient.
+   * @property {number} value - The amount of native tokens to send to the recipient.
+   * @property {string} [data] - The transaction's data in hex format.
+   */
+
+  /**
+   * Sends a transaction with arbitrary data.
+   * @callback SendTransaction
+   * @param {Transaction} tx - The transaction to send.
+   * @returns {Promise<string>} The transaction's hash.
+   */
+
+  /**
    * Returns the wallet account for a specific blockchain and index (see [BIP-44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki)).
    *
    * @example
@@ -159,7 +205,7 @@ export default class WdkManager {
    * const account = wdk.getAccount("ethereum", 1);
    * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
    * @param {number} [index] - The index of the account to get (default: 0).
-   * @returns {IWalletAccount} The account.
+   * @returns {WalletAccount} The account.
   */
   getAccount (blockchain, index = 0) {
     return this.#wallets[blockchain].getAccount(index)
