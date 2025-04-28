@@ -19,6 +19,8 @@ import AccountAbstractionManagerEvm from '@wdk/account-abstraction-evm'
 import WalletManagerTon from '@wdk/wallet-ton'
 import AccountAbstractionManagerTon from '@wdk/account-abstraction-ton'
 
+import WalletManagerBtc from '@wdk/wallet-btc'
+
 import bip39 from 'bip39'
 
 const ACCOUNT_ABSTRACTION_MANAGERS = {
@@ -37,7 +39,8 @@ export const Blockchain = {
   Ethereum: 'ethereum',
   Arbitrum: 'arbitrum',
   Polygon: 'polygon',
-  Ton: 'ton'
+  Ton: 'ton',
+  Bitcoin: 'bitcoin'
 }
 
 const EVM_BLOCKCHAINS = [
@@ -57,6 +60,7 @@ export default class WdkManager {
    * @property {string} arbitrum - The arbitrum's wallet seed phrase.
    * @property {string} polygon - The polygon's wallet seed phrase.
    * @property {string} ton - The ton's wallet seed phrase.
+   * @property {string} bitcoin - The bitcoin's wallet seed phrase.
    */
 
   /**
@@ -120,6 +124,9 @@ export default class WdkManager {
           tonApiUrl: accountAbstractionConfig.ton?.tonApiUrl,
           tonApiSecretKey: accountAbstractionConfig.ton?.tonApiSecretKey
         })
+      }
+      else if (blockchain === 'bitcoin') {
+        this.#wallets.bitcoin = new WalletManagerBtc(seedPhrase)
       }
     }
 
@@ -379,8 +386,8 @@ export default class WdkManager {
   }
 
   #getAccountAbstractionManager (blockchain, accountIndex) {
-    if (!Object.values(Blockchain).includes(blockchain)) {
-      throw new Error(`Unsupported blockchain: ${blockchain}.`)
+    if (!ACCOUNT_ABSTRACTION_MANAGERS[blockchain]) {
+      throw new Error(`Account abstraction unsupported for blockchain: ${blockchain}.`)
     }
 
     if (!this.#cache[[blockchain, accountIndex]]) {
