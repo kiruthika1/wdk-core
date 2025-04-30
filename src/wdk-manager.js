@@ -46,7 +46,7 @@ export const Blockchain = {
 const EVM_BLOCKCHAINS = [
   Blockchain.Ethereum,
   Blockchain.Arbitrum,
-  Blockchain.Ton
+  Blockchain.Polygon
 ]
 
 export default class WdkManager {
