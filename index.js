@@ -13,4 +13,14 @@
 // limitations under the License.
 'use strict'
 
+/** @typedef {import('./src/wdk-manager.js').Seeds} Seeds */
+/** @typedef {import('./src/wdk-manager.js').WdkConfig} WdkConfig */
+
+/** @typedef {import('./src/wdk-manager.js').TransferOptions} TransferOptions */
+/** @typedef {import('./src/wdk-manager.js').TransferResult} TransferResult */
+/** @typedef {import('./src/wdk-manager.js').SwapOptions} SwapOptions */
+/** @typedef {import('./src/wdk-manager.js').SwapResult} SwapResult */
+/** @typedef {import('./src/wdk-manager.js').BridgeOptions} BridgeOptions */
+/** @typedef {import('./src/wdk-manager.js').BridgeResult} BridgeResult */
+
 export { default, Blockchain } from './src/wdk-manager.js'

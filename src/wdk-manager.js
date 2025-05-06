@@ -21,14 +21,82 @@ import AccountAbstractionManagerTon from '@wdk/account-abstraction-ton'
 
 import WalletManagerBtc from '@wdk/wallet-btc'
 
+import WalletManagerSpark from '@wdk/wallet-spark'
+
 import bip39 from 'bip39'
 
-const ACCOUNT_ABSTRACTION_MANAGERS = {
-  ethereum: AccountAbstractionManagerEvm,
-  arbitrum: AccountAbstractionManagerEvm,
-  polygon: AccountAbstractionManagerEvm,
-  ton: AccountAbstractionManagerTon
-}
+/** @typedef {import('@wdk/wallet-evm').EvmWalletConfig} EvmWalletConfig */
+/** @typedef {import('@wdk/account-abstraction-evm').EvmAccountAbstractionConfig} EvmAccountAbstractionConfig */
+
+/** @typedef {import('@wdk/wallet-ton').TonWalletConfig} TonWalletConfig */
+/** @typedef {import('@wdk/account-abstraction-ton').TonAccountAbstractionConfig} TonAccountAbstractionConfig */
+
+/** @typedef {import('@wdk/wallet-btc').BtcWalletConfig} BtcWalletConfig */
+
+/** @typedef {import('@wdk/wallet-spark').SparkWalletConfig} SparkWalletConfig */
+
+/**
+ * @typedef {Object} Seeds
+ * @property {string} ethereum - The ethereum's wallet seed phrase.
+ * @property {string} arbitrum - The arbitrum's wallet seed phrase.
+ * @property {string} polygon - The polygon's wallet seed phrase.
+ * @property {string} ton - The ton's wallet seed phrase.
+ * @property {string} bitcoin - The bitcoin's wallet seed phrase.
+ * @property {string} spark - The spark's wallet seed phrase.
+ */
+
+/**
+ * @typedef {Object} WdkConfig
+ * @property {EvmWalletConfig | EvmAccountAbstractionConfig} ethereum - The ethereum blockchain configuration.
+ * @property {EvmWalletConfig | EvmAccountAbstractionConfig} arbitrum - The arbitrum blockchain configuration.
+ * @property {EvmWalletConfig | EvmAccountAbstractionConfig} polygon - The polygon blockchain configuration.
+ * @property {TonWalletConfig | TonAccountAbstractionConfig} ton - The ton blockchain configuration.
+ * @property {BtcWalletConfig} bitcoin - The bitcoin blockchain configuration.
+ * @property {SparkWalletConfig} spark - The spark blockchain configuration.
+ */
+
+/**
+ * @typedef {Object} TransferOptions
+ * @property {string} recipient - The address of the recipient.
+ * @property {string} token - The address of the token to transfer.
+ * @property {number} amount - The amount of tokens to transfer to the recipient (in base unit).
+ */
+
+/**
+ * @typedef {Object} TransferResult
+ * @property {string} hash - The hash of the transfer operation.
+ * @property {number} gasCost - The gas cost in paymaster token.
+ */
+
+/**
+ * @typedef {Object} SwapOptions
+ * @property {string} tokenIn - The address of the token to sell.
+ * @property {string} tokenOut - The address of the token to buy.
+ * @property {number} [tokenInAmount] - The amount of input tokens to sell (in base unit).
+ * @property {number} [tokenOutAmount] - The amount of output tokens to buy (in base unit).
+ */
+
+/**
+ * @typedef {Object} SwapResult
+ * @property {string} hash - The hash of the swap operation.
+ * @property {number} gasCost - The gas cost in paymaster token.
+ * @property {number} tokenInAmount - The amount of input tokens sold.
+ * @property {number} tokenOutAmount - The amount of output tokens bought.
+ */
+
+/**
+ * @typedef {Object} BridgeOptions
+ * @property {string} targetChain - The identifier of the destination blockchain (e.g., "arbitrum").
+ * @property {string} recipient - The address of the recipient.
+ * @property {number} amount - The amount of usdt tokens to bridge to the destination chain (in base unit).
+ */
+
+/**
+ * @typedef {Object} BridgeResult
+ * @property {string} hash - The hash of the bridge operation.
+ * @property {number} gasCost - The gas cost in paymaster token.
+ * @property {number} bridgeCost - The bridge cost in usdt tokens.
+ */
 
 /**
  * Enumeration for all available blockchains.
@@ -40,7 +108,8 @@ export const Blockchain = {
   Arbitrum: 'arbitrum',
   Polygon: 'polygon',
   Ton: 'ton',
-  Bitcoin: 'bitcoin'
+  Bitcoin: 'bitcoin',
+  Spark: 'spark'
 }
 
 const EVM_BLOCKCHAINS = [
@@ -49,65 +118,27 @@ const EVM_BLOCKCHAINS = [
   Blockchain.Polygon
 ]
 
+const ACCOUNT_ABSTRACTION_MANAGERS = {
+  ethereum: AccountAbstractionManagerEvm,
+  arbitrum: AccountAbstractionManagerEvm,
+  polygon: AccountAbstractionManagerEvm,
+  ton: AccountAbstractionManagerTon
+}
+
 export default class WdkManager {
-  #accountAbstractionConfig
+  #config
   #wallets
   #cache
-
-  /**
-   * @typedef {Object} Seeds
-   * @property {string} ethereum - The ethereum's wallet seed phrase.
-   * @property {string} arbitrum - The arbitrum's wallet seed phrase.
-   * @property {string} polygon - The polygon's wallet seed phrase.
-   * @property {string} ton - The ton's wallet seed phrase.
-   * @property {string} bitcoin - The bitcoin's wallet seed phrase.
-   */
-
-  /**
-   * @typedef {Object} AccountAbstractionConfig
-   * @property {EvmAccountAbstractionConfig} ethereum - The account abstraction configuration for ethereum.
-   * @property {EvmAccountAbstractionConfig} arbitrum - The account abstraction configuration for arbitrum.
-   * @property {EvmAccountAbstractionConfig} polygon - The account abstraction configuration for polygon.
-   * @property {TonAccountAbstractionConfig} ton - The account abstraction configuration for ton.
-   */
-
-  /**
-   * @typedef {Object} EvmAccountAbstractionConfig
-   * @property {string} blockchain - The blockchain’s identifier (e.g., "ethereum").
-   * @property {string} rpcUrl - The url of the rpc provider.
-   * @property {string} bundlerUrl - The url of the bundler service.
-   * @property {string} paymasterUrl - The url of the paymaster service.
-   * @property {string} paymasterAddress - The address of the paymaster smart contract.
-   * @property {string} entryPointAddress - The address of the entry point smart contract.
-   * @property {string} paymasterTokenOracleAddress - The address of the paymaster token oracle.
-   * @property {number} paymasterPremiumOnGasCost - The percentage of the gas cost that the paymaster holds as a premium.
-   * @property {number} minimumAllowanceToPaymaster - Minimum amount of allowance to give to the paymaster.
-   * @property {number} transferMaxFee - Maximum fee amount for transfer operations.
-   * @property {number} swapMaxFee - Maximum fee amount for swap operations.
-   * @property {number} bridgeMaxFee - Maximum fee amount for bridge operations.
-   * @property {Object} paymasterToken - The paymaster token configuration.
-   * @property {string} paymasterToken.address - The address of the paymaster token.
-   */
-
-  /**
-   * @typedef {Object} TonAccountAbstractionConfig
-   * @property {string} tonApiUrl - The ton api's url.
-   * @property {string} tonApiSecretKey - The api-key to use to authenticate on the ton api.
-   * @property {string} tonCenterUrl - The ton center api's url.
-   * @property {string} tonCenterSecretKey - The api-key to use to authenticate on the ton center api.
-   * @property {Object} paymasterToken - The paymaster token configuration.
-   * @property {string} paymasterToken.address - The address of the paymaster token.
-   */
 
   /**
    * Creates a new wallet development kit manager.
    *
    * @param {string | Seeds} seed - A [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) seed phrase to use for
    *                                all blockchains, or an object mapping each blockchain to a different seed phrase.
-   * @param {AccountAbstractionConfig} accountAbstractionConfig - The account abstraction configuration for each blockchain.
+   * @param {WdkConfig} config - The configuration for each blockchain.
    */
-  constructor (seed, accountAbstractionConfig) {
-    this.#accountAbstractionConfig = accountAbstractionConfig
+  constructor (seed, config) {
+    this.#config = config
 
     this.#wallets = { }
 
@@ -115,18 +146,16 @@ export default class WdkManager {
       const seedPhrase = typeof seed === 'string' ? seed : seed[blockchain]
 
       if (EVM_BLOCKCHAINS.includes(blockchain)) {
-        this.#wallets[blockchain] = new WalletManagerEvm(seedPhrase, {
-          rpcUrl: accountAbstractionConfig[blockchain]?.rpcUrl
-        })
+        this.#wallets[blockchain] = new WalletManagerEvm(seedPhrase, config[blockchain])
       }
       else if (blockchain === 'ton') {
-        this.#wallets.ton = new WalletManagerTon(seedPhrase, {
-          tonApiUrl: accountAbstractionConfig.ton?.tonApiUrl,
-          tonApiSecretKey: accountAbstractionConfig.ton?.tonApiSecretKey
-        })
+        this.#wallets.ton = new WalletManagerTon(seedPhrase, config.ton)
       }
       else if (blockchain === 'bitcoin') {
-        this.#wallets.bitcoin = new WalletManagerBtc(seedPhrase)
+        this.#wallets.bitcoin = new WalletManagerBtc(seedPhrase, config.bitcoin)
+      }
+      else if (blockchain === 'spark') {
+        this.#wallets.spark = new WalletManagerSpark(seedPhrase, config.spark)
       }
     }
 
@@ -159,63 +188,17 @@ export default class WdkManager {
   }
 
   /**
-   * @typedef {Object} WalletAccount
-   * @property {string} path - The derivation path of this account (see [BIP-44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki)).
-   * @property {number} index - The derivation path's index of this account.
-   * @property {string} address - The account’s address.
-   * @property {KeyPair} keyPair - The account’s key pair.
-   * @property {Sign} sign
-   * @property {Verify} verify
-   * @property {SendTransaction} sendTransaction
-   */
-
-  /**
-   * @typedef {Object} KeyPair
-   * @property {string} publicKey - The public key.
-   * @property {string} privateKey - The private key.
-   */
-
-  /**
-   * Signs a message.
-   * @callback Sign
-   * @param {string} message - The message to sign.
-   * @returns {Promise<string>} The message's signature.
-   */
-
-  /**
-   * Verifies a message's signature.
-   * @callback Verify
-   * @param {string} message - The original message.
-   * @param {string} signature - The signature to verify.
-   * @returns {Promise<boolean>} True if the signature is valid.
-   */
-
-  /**
-   * @typedef {Object} Transaction
-   * @property {string} to - The transaction's recipient.
-   * @property {number} value - The amount of native tokens to send to the recipient.
-   * @property {string} [data] - The transaction's data in hex format.
-   */
-
-  /**
-   * Sends a transaction with arbitrary data.
-   * @callback SendTransaction
-   * @param {Transaction} tx - The transaction to send.
-   * @returns {Promise<string>} The transaction's hash.
-   */
-
-  /**
    * Returns the wallet account for a specific blockchain and index (see [BIP-44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki)).
    *
    * @example
    * // Return the account for the ethereum blockchain with derivation path m/44'/60'/0'/0/1
-   * const account = wdk.getAccount("ethereum", 1);
+   * const account = await wdk.getAccount("ethereum", 1);
    * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
    * @param {number} [index] - The index of the account to get (default: 0).
-   * @returns {WalletAccount} The account.
+   * @returns {Promise<IWalletAccount>} The account.
   */
-  getAccount (blockchain, index = 0) {
-    return this.#wallets[blockchain].getAccount(index)
+  async getAccount (blockchain, index = 0) {
+    return await this.#wallets[blockchain].getAccount(index)
   }
 
   /**
@@ -234,19 +217,6 @@ export default class WdkManager {
 
     return await manager.getAbstractedAddress()
   }
-
-  /**
-   * @typedef {Object} TransferOptions
-   * @property {string} recipient - The address of the recipient.
-   * @property {string} token - The address of the token to transfer.
-   * @property {number} amount - The amount of tokens to transfer to the recipient (in base unit).
-   */
-
-  /**
-   * @typedef {Object} TransferResult
-   * @property {string} hash - The hash of the transfer operation.
-   * @property {number} gasCost - The gas cost in paymaster token.
-   */
 
   /**
    * Transfers a token to another address.
@@ -298,22 +268,6 @@ export default class WdkManager {
   }
 
   /**
-   * @typedef {Object} SwapOptions
-   * @property {string} tokenIn - The address of the token to sell.
-   * @property {string} tokenOut - The address of the token to buy.
-   * @property {number} [tokenInAmount] - The amount of input tokens to sell (in base unit).
-   * @property {number} [tokenOutAmount] - The amount of output tokens to buy (in base unit).
-   */
-
-  /**
-   * @typedef {Object} SwapResult
-   * @property {string} hash - The hash of the swap operation.
-   * @property {number} gasCost - The gas cost in paymaster token.
-   * @property {number} tokenInAmount - The amount of input tokens sold.
-   * @property {number} tokenOutAmount - The amount of output tokens bought.
-   */
-
-  /**
    * Swaps a pair of tokens.
    *
    * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
@@ -341,20 +295,6 @@ export default class WdkManager {
 
     return await manager.quoteSwap(options)
   }
-
-  /**
-   * @typedef {Object} BridgeOptions
-   * @property {string} targetChain - The identifier of the destination blockchain (e.g., "arbitrum").
-   * @property {string} recipient - The address of the recipient.
-   * @property {number} amount - The amount of usdt tokens to bridge to the destination chain (in base unit).
-   */
-
-  /**
-   * @typedef {Object} BridgeResult
-   * @property {string} hash - The hash of the bridge operation.
-   * @property {number} gasCost - The gas cost in paymaster token.
-   * @property {number} bridgeCost - The bridge cost in usdt tokens.
-   */
 
   /**
    * Bridges usdt tokens to a different blockchain.
@@ -392,7 +332,7 @@ export default class WdkManager {
 
     if (!this.#cache[[blockchain, accountIndex]]) {
       const account = this.getAccount(blockchain, accountIndex)
-      const config = this.#accountAbstractionConfig[blockchain]
+      const config = this.#config[blockchain]
       const manager = new ACCOUNT_ABSTRACTION_MANAGERS[blockchain](account, config)
 
       this.#cache[[blockchain, accountIndex]] = manager

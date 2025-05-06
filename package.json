@@ -4,22 +4,25 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "build:types": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "docs": "jsdoc -r . --destination ./docs",
     "lint": "standard",
     "lint:fix": "standard --fix"
   },
   "dependencies": {
-    "@wdk/account-abstraction-evm": "https://github.com/tetherto/wdk-account-abstraction-evm",
-    "@wdk/account-abstraction-ton": "https://github.com/tetherto/wdk-account-abstraction-ton",
+    "@wdk/account-abstraction-evm": "https://github.com/davi0kprogramsthings/wdk-account-abstraction-evm#develop",
+    "@wdk/account-abstraction-ton": "https://github.com/davi0kprogramsthings/wdk-account-abstraction-ton#develop",
     "@wdk/wallet-btc": "https://github.com/davi0kprogramsthings/wdk-wallet-btc#develop",
-    "@wdk/wallet-evm": "https://github.com/tetherto/wdk-wallet-evm",
-    "@wdk/wallet-ton": "https://github.com/tetherto/wdk-wallet-ton",
+    "@wdk/wallet-evm": "https://github.com/davi0kprogramsthings/wdk-wallet-evm#develop",
+    "@wdk/wallet-spark": "https://github.com/davi0kprogramsthings/wdk-wallet-spark#develop",
+    "@wdk/wallet-ton": "https://github.com/davi0kprogramsthings/wdk-wallet-ton#develop",
     "bip39": "^3.1.0"
   },
   "devDependencies": {
     "jsdoc": "^4.0.4",
-    "standard": "^17.1.2"
+    "standard": "^17.1.2",
+    "typescript": "^5.8.3"
   },
   "author": "Tether",
   "license": "Apache-2.0"
