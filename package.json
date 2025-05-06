@@ -11,12 +11,12 @@
     "lint:fix": "standard --fix"
   },
   "dependencies": {
-    "@wdk/account-abstraction-evm": "https://github.com/davi0kprogramsthings/wdk-account-abstraction-evm#develop",
-    "@wdk/account-abstraction-ton": "https://github.com/davi0kprogramsthings/wdk-account-abstraction-ton#develop",
-    "@wdk/wallet-btc": "https://github.com/davi0kprogramsthings/wdk-wallet-btc#develop",
-    "@wdk/wallet-evm": "https://github.com/davi0kprogramsthings/wdk-wallet-evm#develop",
-    "@wdk/wallet-spark": "https://github.com/davi0kprogramsthings/wdk-wallet-spark#develop",
-    "@wdk/wallet-ton": "https://github.com/davi0kprogramsthings/wdk-wallet-ton#develop",
+    "@wdk/account-abstraction-evm": "https://github.com/tetherto/wdk-account-abstraction-evm",
+    "@wdk/account-abstraction-ton": "https://github.com/tetherto/wdk-account-abstraction-ton",
+    "@wdk/wallet-btc": "https://github.com/tetherto/wdk-wallet-btc",
+    "@wdk/wallet-evm": "https://github.com/tetherto/wdk-wallet-evm",
+    "@wdk/wallet-spark": "https://github.com/tetherto/wdk-wallet-spark",
+    "@wdk/wallet-ton": "https://github.com/tetherto/wdk-wallet-ton",
     "bip39": "^3.1.0"
   },
   "devDependencies": {
