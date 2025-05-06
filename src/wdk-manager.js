@@ -213,7 +213,7 @@ export default class WdkManager {
    * const abstractedAddress = await wdk.getAbstractedAddress("ethereum", 3);
    */
   async getAbstractedAddress (blockchain, accountIndex) {
-    const manager = this.#getAccountAbstractionManager(blockchain, accountIndex)
+    const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
 
     return await manager.getAbstractedAddress()
   }
@@ -237,7 +237,7 @@ export default class WdkManager {
    * console.log("Transaction hash:", transfer.hash);
    */
   async transfer (blockchain, accountIndex, options) {
-    const manager = this.#getAccountAbstractionManager(blockchain, accountIndex)
+    const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
 
     return await manager.transfer(options)
   }
@@ -262,7 +262,7 @@ export default class WdkManager {
    * console.log("Gas cost in paymaster token:", quote.gasCost);
    */
   async quoteTransfer (blockchain, accountIndex, options) {
-    const manager = this.#getAccountAbstractionManager(blockchain, accountIndex)
+    const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
 
     return await manager.quoteTransfer(options)
   }
@@ -276,7 +276,7 @@ export default class WdkManager {
    * @returns {Promise<SwapResult>} The swap's result.
    */
   async swap (blockchain, accountIndex, options) {
-    const manager = this.#getAccountAbstractionManager(blockchain, accountIndex)
+    const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
 
     return await manager.swap(options)
   }
@@ -291,7 +291,7 @@ export default class WdkManager {
    * @returns {Promise<Omit<SwapResult, 'hash'>>} The swap's quotes.
    */
   async quoteSwap (blockchain, accountIndex, options) {
-    const manager = this.#getAccountAbstractionManager(blockchain, accountIndex)
+    const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
 
     return await manager.quoteSwap(options)
   }
@@ -305,7 +305,7 @@ export default class WdkManager {
    * @returns {Promise<BridgeResult>} The bridge's result.
    */
   async bridge (blockchain, accountIndex, options) {
-    const manager = this.#getAccountAbstractionManager(blockchain, accountIndex)
+    const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
 
     return await manager.bridge(options)
   }
@@ -320,18 +320,18 @@ export default class WdkManager {
    * @returns {Promise<Omit<BridgeResult, 'hash'>>} The bridge's quotes.
    */
   async quoteBridge (blockchain, accountIndex, options) {
-    const manager = this.#getAccountAbstractionManager(blockchain, accountIndex)
+    const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
 
     return await manager.quoteBridge(options)
   }
 
-  #getAccountAbstractionManager (blockchain, accountIndex) {
+  async #getAccountAbstractionManager (blockchain, accountIndex) {
     if (!ACCOUNT_ABSTRACTION_MANAGERS[blockchain]) {
       throw new Error(`Account abstraction unsupported for blockchain: ${blockchain}.`)
     }
 
     if (!this.#cache[[blockchain, accountIndex]]) {
-      const account = this.getAccount(blockchain, accountIndex)
+      const account = await this.getAccount(blockchain, accountIndex)
       const config = this.#config[blockchain]
       const manager = new ACCOUNT_ABSTRACTION_MANAGERS[blockchain](account, config)
 
