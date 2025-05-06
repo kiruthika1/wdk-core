@@ -35,6 +35,8 @@ import bip39 from 'bip39'
 
 /** @typedef {import('@wdk/wallet-spark').SparkWalletConfig} SparkWalletConfig */
 
+/** @typedef {import('./wallet-account.js').default} IWalletAccount */
+
 /**
  * @typedef {Object} Seeds
  * @property {string} ethereum - The ethereum's wallet seed phrase.

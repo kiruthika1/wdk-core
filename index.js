@@ -14,6 +14,7 @@
 'use strict'
 
 /** @typedef {import('./src/wdk-manager.js').Seeds} Seeds */
+
 /** @typedef {import('./src/wdk-manager.js').WdkConfig} WdkConfig */
 
 /** @typedef {import('./src/wdk-manager.js').TransferOptions} TransferOptions */
@@ -22,5 +23,7 @@
 /** @typedef {import('./src/wdk-manager.js').SwapResult} SwapResult */
 /** @typedef {import('./src/wdk-manager.js').BridgeOptions} BridgeOptions */
 /** @typedef {import('./src/wdk-manager.js').BridgeResult} BridgeResult */
+
+/** @typedef {import('./src/wallet-account.js').default} IWalletAccount */
 
 export { default, Blockchain } from './src/wdk-manager.js'

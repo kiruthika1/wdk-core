@@ -146,6 +146,7 @@ export type TonWalletConfig = import("@wdk/wallet-ton").TonWalletConfig;
 export type TonAccountAbstractionConfig = import("@wdk/account-abstraction-ton").TonAccountAbstractionConfig;
 export type BtcWalletConfig = import("@wdk/wallet-btc").BtcWalletConfig;
 export type SparkWalletConfig = import("@wdk/wallet-spark").SparkWalletConfig;
+export type IWalletAccount = import("./wallet-account.js").default;
 export type Seeds = {
     /**
      * - The ethereum's wallet seed phrase.
