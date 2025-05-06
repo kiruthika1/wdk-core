@@ -11,7 +11,16 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+'use strict'
 
-import WdkManager from './src/wdk-manager.js'
+/** @typedef {import('./src/wdk-manager.js').Seeds} Seeds */
+/** @typedef {import('./src/wdk-manager.js').WdkConfig} WdkConfig */
 
-export default WdkManager
+/** @typedef {import('./src/wdk-manager.js').TransferOptions} TransferOptions */
+/** @typedef {import('./src/wdk-manager.js').TransferResult} TransferResult */
+/** @typedef {import('./src/wdk-manager.js').SwapOptions} SwapOptions */
+/** @typedef {import('./src/wdk-manager.js').SwapResult} SwapResult */
+/** @typedef {import('./src/wdk-manager.js').BridgeOptions} BridgeOptions */
+/** @typedef {import('./src/wdk-manager.js').BridgeResult} BridgeResult */
+
+export { default, Blockchain } from './src/wdk-manager.js'

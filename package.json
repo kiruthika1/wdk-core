@@ -1,23 +1,28 @@
 {
   "name": "@wdk/core",
-  "version": "0.1.0-beta.1",
+  "version": "1.0.0-beta.1",
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "build:types": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "docs": "jsdoc -r . --destination ./docs",
-    "lint": "standard --fix"
+    "lint": "standard",
+    "lint:fix": "standard --fix"
   },
   "dependencies": {
     "@wdk/account-abstraction-evm": "https://github.com/tetherto/wdk-account-abstraction-evm",
     "@wdk/account-abstraction-ton": "https://github.com/tetherto/wdk-account-abstraction-ton",
+    "@wdk/wallet-btc": "https://github.com/tetherto/wdk-wallet-btc",
     "@wdk/wallet-evm": "https://github.com/tetherto/wdk-wallet-evm",
+    "@wdk/wallet-spark": "https://github.com/tetherto/wdk-wallet-spark",
     "@wdk/wallet-ton": "https://github.com/tetherto/wdk-wallet-ton",
     "bip39": "^3.1.0"
   },
   "devDependencies": {
     "jsdoc": "^4.0.4",
-    "standard": "^17.1.2"
+    "standard": "^17.1.2",
+    "typescript": "^5.8.3"
   },
   "author": "Tether",
   "license": "Apache-2.0"
