@@ -334,8 +334,16 @@ export default class WdkManager {
 
     if (!this.#cache[[blockchain, accountIndex]]) {
       const account = await this.getAccount(blockchain, accountIndex)
+      
       const config = this.#config[blockchain]
-      const manager = new ACCOUNT_ABSTRACTION_MANAGERS[blockchain](account, config)
+
+      const manager = new ACCOUNT_ABSTRACTION_MANAGERS[blockchain](
+        {
+          address: await account.getAddress(),
+          keyPair: account.keyPair
+        }, 
+        config
+      )
 
       this.#cache[[blockchain, accountIndex]] = manager
     }
