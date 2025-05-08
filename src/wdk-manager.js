@@ -23,7 +23,7 @@ import WalletManagerBtc from '@wdk/wallet-btc'
 
 import WalletManagerSpark from '@wdk/wallet-spark'
 
-import bip39 from 'bip39'
+import * as bip39 from 'bip39'
 
 /** @typedef {import('@wdk/wallet-evm').EvmWalletConfig} EvmWalletConfig */
 /** @typedef {import('@wdk/account-abstraction-evm').EvmAccountAbstractionConfig} EvmAccountAbstractionConfig */
