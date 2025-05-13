@@ -13,15 +13,9 @@
 // limitations under the License.
 'use strict'
 
-import WalletManagerEvm from '@wdk/wallet-evm'
 import AccountAbstractionManagerEvm from '@wdk/account-abstraction-evm'
 
-import WalletManagerTon from '@wdk/wallet-ton'
 import AccountAbstractionManagerTon from '@wdk/account-abstraction-ton'
-
-import WalletManagerBtc from '@wdk/wallet-btc'
-
-import WalletManagerSpark from '@wdk/wallet-spark'
 
 import * as bip39 from 'bip39'
 
@@ -128,8 +122,10 @@ const ACCOUNT_ABSTRACTION_MANAGERS = {
 }
 
 export default class WdkManager {
+  #seed
   #config
   #wallets
+
   #cache
 
   /**
@@ -140,26 +136,9 @@ export default class WdkManager {
    * @param {WdkConfig} config - The configuration for each blockchain.
    */
   constructor (seed, config) {
+    this.#seed = seed
     this.#config = config
-
     this.#wallets = { }
-
-    for (const blockchain of Object.values(Blockchain)) {
-      const seedPhrase = typeof seed === 'string' ? seed : seed[blockchain]
-
-      if (EVM_BLOCKCHAINS.includes(blockchain)) {
-        this.#wallets[blockchain] = new WalletManagerEvm(seedPhrase, config[blockchain])
-      }
-      else if (blockchain === 'ton') {
-        this.#wallets.ton = new WalletManagerTon(seedPhrase, config.ton)
-      }
-      else if (blockchain === 'bitcoin') {
-        this.#wallets.bitcoin = new WalletManagerBtc(seedPhrase, config.bitcoin)
-      }
-      else if (blockchain === 'spark') {
-        this.#wallets.spark = new WalletManagerSpark(seedPhrase, config.spark)
-      }
-    }
 
     this.#cache = { }
   }
@@ -200,7 +179,9 @@ export default class WdkManager {
    * @returns {Promise<IWalletAccount>} The account.
   */
   async getAccount (blockchain, index = 0) {
-    return await this.#wallets[blockchain].getAccount(index)
+    const wallet = await this.#getWalletManager(blockchain)
+
+    return await wallet.getAccount(index)
   }
 
   /**
@@ -325,6 +306,42 @@ export default class WdkManager {
     const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
 
     return await manager.quoteBridge(options)
+  }
+
+  async #getWalletManager (blockchain) {
+    if (!Object.values(Blockchain).includes(blockchain)) {
+      throw new Error(`Unsupported blockchain: ${blockchain}.`)
+    }
+
+    if (!this.#wallets[blockchain]) {
+      const seed = this.#seed,
+            config = this.#config
+
+      const seedPhrase = typeof seed === 'string' ? seed : seed[blockchain]
+
+      if (EVM_BLOCKCHAINS.includes(blockchain)) {
+        const { default: WalletManagerEvm } = await import('@wdk/wallet-evm')
+
+        this.#wallets[blockchain] = new WalletManagerEvm(seedPhrase, config[blockchain])
+      }
+      else if (blockchain === 'ton') {
+        const { default: WalletManagerTon } = await import('@wdk/wallet-ton')
+
+        this.#wallets.ton = new WalletManagerTon(seedPhrase, config.ton)
+      }
+      else if (blockchain === 'bitcoin') {
+        const { default: WalletManagerBtc } = await import('@wdk/wallet-btc')
+
+        this.#wallets.bitcoin = new WalletManagerBtc(seedPhrase, config.bitcoin)
+      }
+      else if (blockchain === 'spark') {
+        const { default: WalletManagerSpark } = await import('@wdk/wallet-spark')
+
+        this.#wallets.spark = new WalletManagerSpark(seedPhrase, config.spark)
+      }
+    }
+
+    return this.#wallets[blockchain]
   }
 
   async #getAccountAbstractionManager (blockchain, accountIndex) {
