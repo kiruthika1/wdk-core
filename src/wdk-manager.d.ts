@@ -50,6 +50,27 @@ export default class WdkManager {
     */
     getAccount(blockchain: Blockchain, index?: number): Promise<IWalletAccount>;
     /**
+     * Returns the wallet account for a specific blockchain and BIP-44 derivation path.
+     *
+     * @example
+     * // Returns the account for the ethereum blockchain with derivation path m/44'/60'/0'/0/1
+     * const account = await wdk.getAccountByPath("ethereum", "0'/0/1");
+     * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
+     * @param {string} path - The derivation path (e.g. "0'/0/0").
+     * @returns {Promise<IWalletAccount>} The account.
+     */
+    getAccountByPath(blockchain: Blockchain, path: string): Promise<IWalletAccount>;
+    /**
+     * Returns the current fee rates for a specific blockchain.
+     *
+     * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
+     * @returns {Promise<{ normal: number, fast: number }>} The fee rates (in weis).
+     */
+    getFeeRates(blockchain: Blockchain): Promise<{
+        normal: number;
+        fast: number;
+    }>;
+    /**
      * Returns the abstracted address of an account.
      *
      * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
@@ -62,11 +83,37 @@ export default class WdkManager {
      */
     getAbstractedAddress(blockchain: Blockchain, accountIndex: number): Promise<string>;
     /**
+     * Returns the native token balance of an abstracted address.
+     *
+     * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
+     * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
+     * @returns {Promise<number>} The native token balance (in base unit).
+     */
+    getAbstractedAddressBalance(blockchain: Blockchain, accountIndex: number): Promise<number>;
+    /**
+     * Returns the balance of an abstracted address for a specific token.
+     *
+     * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
+     * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
+     * @param {string} tokenAddress - The smart contract address of the token
+     * @returns {Promise<number>} The token balance (in base unit).
+     */
+    getAbstractedAddressTokenBalance(blockchain: Blockchain, accountIndex: number, tokenAddress: string): Promise<number>;
+    /**
+     * Returns the paymaster token balance of an abstracted address.
+     *
+     * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
+     * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
+     * @returns {Promise<number>} The paymaster token balance (in base unit).
+     */
+    getAbstractedAddressPaymasterTokenBalance(blockchain: Blockchain, accountIndex: number): Promise<number>;
+    /**
      * Transfers a token to another address.
      *
      * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
      * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
      * @param {TransferOptions} options - The transfer's options.
+     * @param {TransferConfig} [config] - If set, overrides the 'transferMaxFee' and 'paymasterToken' options defined in the manager configuration.
      * @returns {Promise<TransferResult>} The transfer's result.
      *
      * @example
@@ -79,7 +126,7 @@ export default class WdkManager {
      *
      * console.log("Transaction hash:", transfer.hash);
      */
-    transfer(blockchain: Blockchain, accountIndex: number, options: TransferOptions): Promise<TransferResult>;
+    transfer(blockchain: Blockchain, accountIndex: number, options: TransferOptions, config?: TransferConfig): Promise<TransferResult>;
     /**
      * Quotes the costs of a transfer operation.
      *
@@ -87,6 +134,7 @@ export default class WdkManager {
      * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
      * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
      * @param {TransferOptions} options - The transfer's options.
+     * @param {TransferConfig} [config] - If set, overrides the 'transferMaxFee' and 'paymasterToken' options defined in the manager configuration.
      * @returns {Promise<Omit<TransferResult, 'hash'>>} The transfer's quotes.
      *
      * @example
@@ -99,16 +147,17 @@ export default class WdkManager {
      *
      * console.log("Gas cost in paymaster token:", quote.gasCost);
      */
-    quoteTransfer(blockchain: Blockchain, accountIndex: number, options: TransferOptions): Promise<Omit<TransferResult, "hash">>;
+    quoteTransfer(blockchain: Blockchain, accountIndex: number, options: TransferOptions, config?: TransferConfig): Promise<Omit<TransferResult, "hash">>;
     /**
      * Swaps a pair of tokens.
      *
      * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
      * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
      * @param {SwapOptions} options - The swap's options.
+     * @param {SwapConfig} [config] - If set, overrides the 'swapMaxFee' and 'paymasterToken' options defined in the manager configuration.
      * @returns {Promise<SwapResult>} The swap's result.
      */
-    swap(blockchain: Blockchain, accountIndex: number, options: SwapOptions): Promise<SwapResult>;
+    swap(blockchain: Blockchain, accountIndex: number, options: SwapOptions, config?: SwapConfig): Promise<SwapResult>;
     /**
      * Quotes the costs of a swap operation.
      *
@@ -116,18 +165,20 @@ export default class WdkManager {
      * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
      * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
      * @param {SwapOptions} options - The swap's options.
+     * @param {SwapConfig} [config] - If set, overrides the 'swapMaxFee' and 'paymasterToken' options defined in the manager configuration.
      * @returns {Promise<Omit<SwapResult, 'hash'>>} The swap's quotes.
      */
-    quoteSwap(blockchain: Blockchain, accountIndex: number, options: SwapOptions): Promise<Omit<SwapResult, "hash">>;
+    quoteSwap(blockchain: Blockchain, accountIndex: number, options: SwapOptions, config?: SwapConfig): Promise<Omit<SwapResult, "hash">>;
     /**
      * Bridges usdt tokens to a different blockchain.
      *
      * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
      * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
      * @param {BridgeOptions} options - The bridge's options.
+     * @param {BridgeConfig} [config] - If set, overrides the 'bridgeMaxFee' and 'paymasterToken' options defined in the manager configuration.
      * @returns {Promise<BridgeResult>} The bridge's result.
      */
-    bridge(blockchain: Blockchain, accountIndex: number, options: BridgeOptions): Promise<BridgeResult>;
+    bridge(blockchain: Blockchain, accountIndex: number, options: BridgeOptions, config?: BridgeConfig): Promise<BridgeResult>;
     /**
      * Quotes the costs of a bridge operation.
      *
@@ -135,9 +186,10 @@ export default class WdkManager {
      * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
      * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
      * @param {BridgeOptions} options - The bridge's options.
+     * @param {BridgeConfig} [config] - If set, overrides the 'bridgeMaxFee' and 'paymasterToken' options defined in the manager configuration.
      * @returns {Promise<Omit<BridgeResult, 'hash'>>} The bridge's quotes.
      */
-    quoteBridge(blockchain: Blockchain, accountIndex: number, options: BridgeOptions): Promise<Omit<BridgeResult, "hash">>;
+    quoteBridge(blockchain: Blockchain, accountIndex: number, options: BridgeOptions, config?: BridgeConfig): Promise<Omit<BridgeResult, "hash">>;
     #private;
 }
 export type EvmWalletConfig = import("@wdk/wallet-evm").EvmWalletConfig;
@@ -146,6 +198,7 @@ export type TonWalletConfig = import("@wdk/wallet-ton").TonWalletConfig;
 export type TonAccountAbstractionConfig = import("@wdk/account-abstraction-ton").TonAccountAbstractionConfig;
 export type BtcWalletConfig = import("@wdk/wallet-btc").BtcWalletConfig;
 export type SparkWalletConfig = import("@wdk/wallet-spark").SparkWalletConfig;
+export type IWalletAccount = import("./wallet-account.js").default;
 export type Seeds = {
     /**
      * - The ethereum's wallet seed phrase.
@@ -212,6 +265,18 @@ export type TransferOptions = {
      */
     amount: number;
 };
+export type TransferConfig = {
+    /**
+     * - The maximum fee amount for transfer operations.
+     */
+    transferMaxFee?: number;
+    /**
+     * - The paymaster token configuration.
+     */
+    paymasterToken: {
+        address: string;
+    };
+};
 export type TransferResult = {
     /**
      * - The hash of the transfer operation.
@@ -239,6 +304,18 @@ export type SwapOptions = {
      * - The amount of output tokens to buy (in base unit).
      */
     tokenOutAmount?: number;
+};
+export type SwapConfig = {
+    /**
+     * - The maximum fee amount for swap operations.
+     */
+    swapMaxFee?: number;
+    /**
+     * - The paymaster token configuration.
+     */
+    paymasterToken: {
+        address: string;
+    };
 };
 export type SwapResult = {
     /**
@@ -268,9 +345,25 @@ export type BridgeOptions = {
      */
     recipient: string;
     /**
+     * - The address of the token to bridge.
+     */
+    token: string;
+    /**
      * - The amount of usdt tokens to bridge to the destination chain (in base unit).
      */
     amount: number;
+};
+export type BridgeConfig = {
+    /**
+     * - The maximum fee amount for bridge operations.
+     */
+    bridgeMaxFee?: number;
+    /**
+     * - The paymaster token configuration.
+     */
+    paymasterToken: {
+        address: string;
+    };
 };
 export type BridgeResult = {
     /**

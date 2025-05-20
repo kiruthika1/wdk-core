@@ -1,7 +1,8 @@
 {
   "include": [
     "index.js",
-    "src/wdk-manager.js"
+    "src/wdk-manager.js",
+    "src/wallet-account.js"
   ],
   "compilerOptions": {
     "target": "ES2015",
