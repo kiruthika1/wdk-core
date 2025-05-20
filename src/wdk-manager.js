@@ -59,6 +59,13 @@ import * as bip39 from 'bip39'
  */
 
 /**
+ * @typedef {Object} TransferConfig
+ * @property {number} [transferMaxFee] - The maximum fee amount for transfer operations.
+ * @property {Object} paymasterToken - The paymaster token configuration.
+ * @property {string} paymasterToken.address - The address of the paymaster token.
+ */
+
+/**
  * @typedef {Object} TransferResult
  * @property {string} hash - The hash of the transfer operation.
  * @property {number} gasCost - The gas cost in paymaster token.
@@ -73,6 +80,13 @@ import * as bip39 from 'bip39'
  */
 
 /**
+ * @typedef {Object} SwapConfig
+ * @property {number} [swapMaxFee] - The maximum fee amount for swap operations.
+ * @property {Object} paymasterToken - The paymaster token configuration.
+ * @property {string} paymasterToken.address - The address of the paymaster token.
+ */
+
+/**
  * @typedef {Object} SwapResult
  * @property {string} hash - The hash of the swap operation.
  * @property {number} gasCost - The gas cost in paymaster token.
@@ -84,7 +98,15 @@ import * as bip39 from 'bip39'
  * @typedef {Object} BridgeOptions
  * @property {string} targetChain - The identifier of the destination blockchain (e.g., "arbitrum").
  * @property {string} recipient - The address of the recipient.
+ * @property {string} token - The address of the token to bridge.
  * @property {number} amount - The amount of usdt tokens to bridge to the destination chain (in base unit).
+ */
+
+/**
+ * @typedef {Object} BridgeConfig
+ * @property {number} [bridgeMaxFee] - The maximum fee amount for bridge operations.
+ * @property {Object} paymasterToken - The paymaster token configuration.
+ * @property {string} paymasterToken.address - The address of the paymaster token.
  */
 
 /**
@@ -185,6 +207,34 @@ export default class WdkManager {
   }
 
   /**
+   * Returns the wallet account for a specific blockchain and BIP-44 derivation path.
+   *
+   * @example
+   * // Returns the account for the ethereum blockchain with derivation path m/44'/60'/0'/0/1
+   * const account = await wdk.getAccountByPath("ethereum", "0'/0/1");
+   * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
+   * @param {string} path - The derivation path (e.g. "0'/0/0").
+   * @returns {Promise<IWalletAccount>} The account.
+   */
+  async getAccountByPath (blockchain, path) {
+    const wallet = await this.#getWalletManager(blockchain)
+
+    return await wallet.getAccountByPath(path)
+  }
+
+  /**
+   * Returns the current fee rates for a specific blockchain.
+   *
+   * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
+   * @returns {Promise<{ normal: number, fast: number }>} The fee rates (in weis).
+   */
+  async getFeeRates (blockchain) { 
+    const wallet = await this.#getWalletManager(blockchain)
+
+    return await wallet.getFeeRates()
+  }
+
+  /**
    * Returns the abstracted address of an account.
    *
    * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
@@ -202,11 +252,52 @@ export default class WdkManager {
   }
 
   /**
+   * Returns the native token balance of an abstracted address.
+   *
+   * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
+   * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
+   * @returns {Promise<number>} The native token balance (in base unit).
+   */
+  async getAbstractedAddressBalance (blockchain, accountIndex) {
+    const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
+
+    return await manager.getAbstractedAddressBalance()
+  }
+
+  /**
+   * Returns the balance of an abstracted address for a specific token.
+   *
+   * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
+   * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
+   * @param {string} tokenAddress - The smart contract address of the token
+   * @returns {Promise<number>} The token balance (in base unit).
+   */
+  async getAbstractedAddressTokenBalance (blockchain, accountIndex, tokenAddress) {
+    const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
+
+    return await manager.getAbstractedAddressTokenBalance(tokenAddress)
+  }
+
+  /**
+   * Returns the paymaster token balance of an abstracted address.
+   *
+   * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
+   * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
+   * @returns {Promise<number>} The paymaster token balance (in base unit).
+   */
+  async getAbstractedAddressPaymasterTokenBalance (blockchain, accountIndex) {
+    const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
+
+    return await manager.getAbstractedAddressPaymasterTokenBalance()
+  }
+
+  /**
    * Transfers a token to another address.
    *
    * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
    * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
    * @param {TransferOptions} options - The transfer's options.
+   * @param {TransferConfig} [config] - If set, overrides the 'transferMaxFee' and 'paymasterToken' options defined in the manager configuration.
    * @returns {Promise<TransferResult>} The transfer's result.
    *
    * @example
@@ -219,10 +310,10 @@ export default class WdkManager {
    *
    * console.log("Transaction hash:", transfer.hash);
    */
-  async transfer (blockchain, accountIndex, options) {
+  async transfer (blockchain, accountIndex, options, config) {
     const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
 
-    return await manager.transfer(options)
+    return await manager.transfer(options, config)
   }
 
   /**
@@ -232,6 +323,7 @@ export default class WdkManager {
    * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
    * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
    * @param {TransferOptions} options - The transfer's options.
+   * @param {TransferConfig} [config] - If set, overrides the 'transferMaxFee' and 'paymasterToken' options defined in the manager configuration.
    * @returns {Promise<Omit<TransferResult, 'hash'>>} The transfer's quotes.
    *
    * @example
@@ -244,10 +336,10 @@ export default class WdkManager {
    *
    * console.log("Gas cost in paymaster token:", quote.gasCost);
    */
-  async quoteTransfer (blockchain, accountIndex, options) {
+  async quoteTransfer (blockchain, accountIndex, options, config) {
     const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
 
-    return await manager.quoteTransfer(options)
+    return await manager.quoteTransfer(options, config)
   }
 
   /**
@@ -256,12 +348,13 @@ export default class WdkManager {
    * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
    * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
    * @param {SwapOptions} options - The swap's options.
+   * @param {SwapConfig} [config] - If set, overrides the 'swapMaxFee' and 'paymasterToken' options defined in the manager configuration.
    * @returns {Promise<SwapResult>} The swap's result.
    */
-  async swap (blockchain, accountIndex, options) {
+  async swap (blockchain, accountIndex, options, config) {
     const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
 
-    return await manager.swap(options)
+    return await manager.swap(options, config)
   }
 
   /**
@@ -271,12 +364,13 @@ export default class WdkManager {
    * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
    * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
    * @param {SwapOptions} options - The swap's options.
+   * @param {SwapConfig} [config] - If set, overrides the 'swapMaxFee' and 'paymasterToken' options defined in the manager configuration.
    * @returns {Promise<Omit<SwapResult, 'hash'>>} The swap's quotes.
    */
-  async quoteSwap (blockchain, accountIndex, options) {
+  async quoteSwap (blockchain, accountIndex, options, config) {
     const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
 
-    return await manager.quoteSwap(options)
+    return await manager.quoteSwap(options, config)
   }
 
   /**
@@ -285,12 +379,13 @@ export default class WdkManager {
    * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
    * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
    * @param {BridgeOptions} options - The bridge's options.
+   * @param {BridgeConfig} [config] - If set, overrides the 'bridgeMaxFee' and 'paymasterToken' options defined in the manager configuration.
    * @returns {Promise<BridgeResult>} The bridge's result.
    */
-  async bridge (blockchain, accountIndex, options) {
+  async bridge (blockchain, accountIndex, options, config) {
     const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
 
-    return await manager.bridge(options)
+    return await manager.bridge(options, config)
   }
 
   /**
@@ -300,12 +395,13 @@ export default class WdkManager {
    * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
    * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
    * @param {BridgeOptions} options - The bridge's options.
+   * @param {BridgeConfig} [config] - If set, overrides the 'bridgeMaxFee' and 'paymasterToken' options defined in the manager configuration.
    * @returns {Promise<Omit<BridgeResult, 'hash'>>} The bridge's quotes.
    */
-  async quoteBridge (blockchain, accountIndex, options) {
+  async quoteBridge (blockchain, accountIndex, options, config) {
     const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
 
-    return await manager.quoteBridge(options)
+    return await manager.quoteBridge(options, config)
   }
 
   async #getWalletManager (blockchain) {

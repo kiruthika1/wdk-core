@@ -75,6 +75,18 @@ IWalletAccount.prototype.sendTransaction = async function (tx) {
 }
 
 /**
+ * Quotes a transaction.
+ *
+ * @param {Object} tx - The transaction to quote.
+ * @param {string} tx.to - The transaction's recipient.
+ * @param {number} tx.value - The amount of native tokens to send to the recipient (in base unit).
+ * @returns {Promise<number>} The transaction's fee (in base unit).
+ */
+IWalletAccount.prototype.quoteTransaction = async function (tx) {
+  throw new Error('Not implemented.')
+}
+
+/**
  * Returns the account's native token balance.
  *
  * @returns {Promise<number>} The native token balance.

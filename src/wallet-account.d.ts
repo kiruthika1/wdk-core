@@ -62,6 +62,18 @@ export default class IWalletAccount {
         value: number;
     }): Promise<string>;
     /**
+     * Quotes a transaction.
+     *
+     * @param {Object} tx - The transaction to quote.
+     * @param {string} tx.to - The transaction's recipient.
+     * @param {number} tx.value - The amount of native tokens to send to the recipient (in base unit).
+     * @returns {Promise<number>} The transaction's fee (in base unit).
+     */
+    quoteTransaction(tx: {
+        to: string;
+        value: number;
+    }): Promise<number>;
+    /**
      * Returns the account's native token balance.
      *
      * @returns {Promise<number>} The native token balance.
