@@ -7,8 +7,8 @@ export namespace Blockchain {
     let Arbitrum: string;
     let Polygon: string;
     let Ton: string;
-    let Bitcoin: string;
     let Spark: string;
+    let Tron: string;
 }
 export default class WdkManager {
     /**
@@ -33,11 +33,19 @@ export default class WdkManager {
     /**
      * Creates a new wallet development kit manager.
      *
-     * @param {string | Seeds} seed - A [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) seed phrase to use for
-     *                                all blockchains, or an object mapping each blockchain to a different seed phrase.
+     * @param {Seed | Seeds} seed - A [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) seed phrase to use for
+     *                                             all blockchains, or an object mapping each blockchain to a different seed phrase.
      * @param {WdkConfig} config - The configuration for each blockchain.
      */
-    constructor(seed: string | Seeds, config: WdkConfig);
+    constructor(seed: Seed | Seeds, config: WdkConfig);
+    /** @private */
+    private _seed;
+    /** @private */
+    private _config;
+    /** @private */
+    private _wallets;
+    /** @private */
+    private _account_abstraction_wallets;
     /**
      * Returns the wallet account for a specific blockchain and index (see [BIP-44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki)).
      *
@@ -50,6 +58,19 @@ export default class WdkManager {
     */
     getAccount(blockchain: Blockchain, index?: number): Promise<IWalletAccount>;
     /**
+     * Returns the wallet abstracted account for a specific blockchain and index (see [BIP-44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki)).
+     *
+     * Note that the given blockchain must support account abstraction features for this method to work properly.
+     *
+     * @example
+     * // Return the abstracted account for the ethereum blockchain with derivation path m/44'/60'/0'/0/1
+     * const account = await wdk.getAbstractedAccount("ethereum", 1);
+     * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
+     * @param {number} [index] - The index of the account to get (default: 0).
+     * @returns {Promise<IWalletAccount>} The account.
+    */
+    getAbstractedAccount(blockchain: Blockchain, index?: number): Promise<IWalletAccount>;
+    /**
      * Returns the wallet account for a specific blockchain and BIP-44 derivation path.
      *
      * @example
@@ -61,18 +82,29 @@ export default class WdkManager {
      */
     getAccountByPath(blockchain: Blockchain, path: string): Promise<IWalletAccount>;
     /**
+     * Returns the wallet abstracted account for a specific blockchain and BIP-44 derivation path.
+     *
+     * Note that the given blockchain must support account abstraction features for this method to work properly.
+     *
+     * @example
+     * // Returns the abstracted account for the ethereum blockchain with derivation path m/44'/60'/0'/0/1
+     * const account = await wdk.getAbstractedAccountByPath("ethereum", "0'/0/1");
+     * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
+     * @param {string} path - The derivation path (e.g. "0'/0/0").
+     * @returns {Promise<IWalletAccount>} The account.
+     */
+    getAbstractedAccountByPath(blockchain: Blockchain, path: string): Promise<IWalletAccount>;
+    /**
      * Returns the current fee rates for a specific blockchain.
      *
      * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
-     * @returns {Promise<{ normal: number, fast: number }>} The fee rates (in weis).
+     * @returns {Promise<FeeRates>} The fee rates.
      */
-    getFeeRates(blockchain: Blockchain): Promise<{
-        normal: number;
-        fast: number;
-    }>;
+    getFeeRates(blockchain: Blockchain): Promise<FeeRates>;
     /**
      * Returns the abstracted address of an account.
      *
+     * @deprecated since version 1.0.0-beta.2
      * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
      * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
      * @returns {Promise<string>} The abstracted address.
@@ -85,6 +117,7 @@ export default class WdkManager {
     /**
      * Returns the native token balance of an abstracted address.
      *
+     * @deprecated since version 1.0.0-beta.2
      * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
      * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
      * @returns {Promise<number>} The native token balance (in base unit).
@@ -93,6 +126,7 @@ export default class WdkManager {
     /**
      * Returns the balance of an abstracted address for a specific token.
      *
+     * @deprecated since version 1.0.0-beta.2
      * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
      * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
      * @param {string} tokenAddress - The smart contract address of the token
@@ -102,6 +136,7 @@ export default class WdkManager {
     /**
      * Returns the paymaster token balance of an abstracted address.
      *
+     * @deprecated since version 1.0.0-beta.2
      * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
      * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
      * @returns {Promise<number>} The paymaster token balance (in base unit).
@@ -110,6 +145,7 @@ export default class WdkManager {
     /**
      * Transfers a token to another address.
      *
+     * @deprecated since version 1.0.0-beta.2
      * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
      * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
      * @param {TransferOptions} options - The transfer's options.
@@ -130,6 +166,7 @@ export default class WdkManager {
     /**
      * Quotes the costs of a transfer operation.
      *
+     * @deprecated since version 1.0.0-beta.2
      * @see {@link transfer}
      * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
      * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
@@ -145,125 +182,74 @@ export default class WdkManager {
      *     amount: 1_000_000
      * });
      *
-     * console.log("Gas cost in paymaster token:", quote.gasCost);
+     * console.log("Gas cost in paymaster token:", quote.fee);
      */
     quoteTransfer(blockchain: Blockchain, accountIndex: number, options: TransferOptions, config?: TransferConfig): Promise<Omit<TransferResult, "hash">>;
-    /**
-     * Swaps a pair of tokens.
-     *
-     * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
-     * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
-     * @param {SwapOptions} options - The swap's options.
-     * @param {SwapConfig} [config] - If set, overrides the 'swapMaxFee' and 'paymasterToken' options defined in the manager configuration.
-     * @returns {Promise<SwapResult>} The swap's result.
-     */
-    swap(blockchain: Blockchain, accountIndex: number, options: SwapOptions, config?: SwapConfig): Promise<SwapResult>;
-    /**
-     * Quotes the costs of a swap operation.
-     *
-     * @see {@link swap}
-     * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
-     * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
-     * @param {SwapOptions} options - The swap's options.
-     * @param {SwapConfig} [config] - If set, overrides the 'swapMaxFee' and 'paymasterToken' options defined in the manager configuration.
-     * @returns {Promise<Omit<SwapResult, 'hash'>>} The swap's quotes.
-     */
-    quoteSwap(blockchain: Blockchain, accountIndex: number, options: SwapOptions, config?: SwapConfig): Promise<Omit<SwapResult, "hash">>;
-    /**
-     * Bridges usdt tokens to a different blockchain.
-     *
-     * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
-     * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
-     * @param {BridgeOptions} options - The bridge's options.
-     * @param {BridgeConfig} [config] - If set, overrides the 'bridgeMaxFee' and 'paymasterToken' options defined in the manager configuration.
-     * @returns {Promise<BridgeResult>} The bridge's result.
-     */
-    bridge(blockchain: Blockchain, accountIndex: number, options: BridgeOptions, config?: BridgeConfig): Promise<BridgeResult>;
-    /**
-     * Quotes the costs of a bridge operation.
-     *
-     * @see {@link bridge}
-     * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
-     * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
-     * @param {BridgeOptions} options - The bridge's options.
-     * @param {BridgeConfig} [config] - If set, overrides the 'bridgeMaxFee' and 'paymasterToken' options defined in the manager configuration.
-     * @returns {Promise<Omit<BridgeResult, 'hash'>>} The bridge's quotes.
-     */
-    quoteBridge(blockchain: Blockchain, accountIndex: number, options: BridgeOptions, config?: BridgeConfig): Promise<Omit<BridgeResult, "hash">>;
-    #private;
+    _getWalletManager(blockchain: any): Promise<any>;
+    _getWalletManagerWithAccountAbstraction(blockchain: any): Promise<any>;
 }
+export type FeeRates = import("@wdk/wallet").FeeRates;
+export type TransferOptions = import("@wdk/wallet").TransferOptions;
+export type TransferResult = import("@wdk/wallet").TransferResult;
+export type IWalletAccount = import("@wdk/wallet").IWalletAccount;
 export type EvmWalletConfig = import("@wdk/wallet-evm").EvmWalletConfig;
-export type EvmAccountAbstractionConfig = import("@wdk/account-abstraction-evm").EvmAccountAbstractionConfig;
+export type EvmErc4337WalletConfig = import("@wdk/wallet-evm-erc-4337").EvmErc4337WalletConfig;
 export type TonWalletConfig = import("@wdk/wallet-ton").TonWalletConfig;
-export type TonAccountAbstractionConfig = import("@wdk/account-abstraction-ton").TonAccountAbstractionConfig;
-export type BtcWalletConfig = import("@wdk/wallet-btc").BtcWalletConfig;
+export type TonGaslessWalletConfig = import("@wdk/wallet-ton-gasless").TonGaslessWalletConfig;
 export type SparkWalletConfig = import("@wdk/wallet-spark").SparkWalletConfig;
-export type IWalletAccount = import("./wallet-account.js").default;
+export type TronWalletConfig = import("@wdk/wallet-tron").TronWalletConfig;
+export type Seed = string | Uint8Array;
 export type Seeds = {
     /**
      * - The ethereum's wallet seed phrase.
      */
-    ethereum: string;
+    ethereum: Seed;
     /**
      * - The arbitrum's wallet seed phrase.
      */
-    arbitrum: string;
+    arbitrum: Seed;
     /**
      * - The polygon's wallet seed phrase.
      */
-    polygon: string;
+    polygon: Seed;
     /**
      * - The ton's wallet seed phrase.
      */
-    ton: string;
-    /**
-     * - The bitcoin's wallet seed phrase.
-     */
-    bitcoin: string;
+    ton: Seed;
     /**
      * - The spark's wallet seed phrase.
      */
-    spark: string;
+    spark: Seed;
+    /**
+     * - The tron's wallet seed phrase.
+     */
+    tron: Seed;
 };
 export type WdkConfig = {
     /**
      * - The ethereum blockchain configuration.
      */
-    ethereum: EvmWalletConfig | EvmAccountAbstractionConfig;
+    ethereum: EvmWalletConfig | EvmErc4337WalletConfig;
     /**
      * - The arbitrum blockchain configuration.
      */
-    arbitrum: EvmWalletConfig | EvmAccountAbstractionConfig;
+    arbitrum: EvmWalletConfig | EvmErc4337WalletConfig;
     /**
      * - The polygon blockchain configuration.
      */
-    polygon: EvmWalletConfig | EvmAccountAbstractionConfig;
+    polygon: EvmWalletConfig | EvmErc4337WalletConfig;
     /**
      * - The ton blockchain configuration.
      */
-    ton: TonWalletConfig | TonAccountAbstractionConfig;
-    /**
-     * - The bitcoin blockchain configuration.
-     */
-    bitcoin: BtcWalletConfig;
+    ton: TonWalletConfig | TonGaslessWalletConfig;
     /**
      * - The spark blockchain configuration.
      */
     spark: SparkWalletConfig;
-};
-export type TransferOptions = {
     /**
-     * - The address of the recipient.
+     * - The tron blockchain configuration.
      */
-    recipient: string;
-    /**
-     * - The address of the token to transfer.
-     */
-    token: string;
-    /**
-     * - The amount of tokens to transfer to the recipient (in base unit).
-     */
-    amount: number;
+    tron: TronWalletConfig;
 };
 export type TransferConfig = {
     /**
@@ -276,106 +262,4 @@ export type TransferConfig = {
     paymasterToken: {
         address: string;
     };
-};
-export type TransferResult = {
-    /**
-     * - The hash of the transfer operation.
-     */
-    hash: string;
-    /**
-     * - The gas cost in paymaster token.
-     */
-    gasCost: number;
-};
-export type SwapOptions = {
-    /**
-     * - The address of the token to sell.
-     */
-    tokenIn: string;
-    /**
-     * - The address of the token to buy.
-     */
-    tokenOut: string;
-    /**
-     * - The amount of input tokens to sell (in base unit).
-     */
-    tokenInAmount?: number;
-    /**
-     * - The amount of output tokens to buy (in base unit).
-     */
-    tokenOutAmount?: number;
-};
-export type SwapConfig = {
-    /**
-     * - The maximum fee amount for swap operations.
-     */
-    swapMaxFee?: number;
-    /**
-     * - The paymaster token configuration.
-     */
-    paymasterToken: {
-        address: string;
-    };
-};
-export type SwapResult = {
-    /**
-     * - The hash of the swap operation.
-     */
-    hash: string;
-    /**
-     * - The gas cost in paymaster token.
-     */
-    gasCost: number;
-    /**
-     * - The amount of input tokens sold.
-     */
-    tokenInAmount: number;
-    /**
-     * - The amount of output tokens bought.
-     */
-    tokenOutAmount: number;
-};
-export type BridgeOptions = {
-    /**
-     * - The identifier of the destination blockchain (e.g., "arbitrum").
-     */
-    targetChain: string;
-    /**
-     * - The address of the recipient.
-     */
-    recipient: string;
-    /**
-     * - The address of the token to bridge.
-     */
-    token: string;
-    /**
-     * - The amount of usdt tokens to bridge to the destination chain (in base unit).
-     */
-    amount: number;
-};
-export type BridgeConfig = {
-    /**
-     * - The maximum fee amount for bridge operations.
-     */
-    bridgeMaxFee?: number;
-    /**
-     * - The paymaster token configuration.
-     */
-    paymasterToken: {
-        address: string;
-    };
-};
-export type BridgeResult = {
-    /**
-     * - The hash of the bridge operation.
-     */
-    hash: string;
-    /**
-     * - The gas cost in paymaster token.
-     */
-    gasCost: number;
-    /**
-     * - The bridge cost in usdt tokens.
-     */
-    bridgeCost: number;
 };
