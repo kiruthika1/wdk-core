@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@wdk/wallet": "https://github.com/tetherto/wdk-wallet#develop",
+    "@wdk/wallet-btc": "https://github.com/tetherto/wdk-wallet-btc#develop",
     "@wdk/wallet-evm": "https://github.com/tetherto/wdk-wallet-evm#develop",
     "@wdk/wallet-evm-erc-4337": "https://github.com/vlad0k/wdk-wallet-evm-erc-4337#develop",
     "@wdk/wallet-spark": "https://github.com/tetherto/wdk-wallet-spark#develop",

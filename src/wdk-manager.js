@@ -27,6 +27,8 @@ import * as bip39 from 'bip39'
 /** @typedef {import('@wdk/wallet-ton').TonWalletConfig} TonWalletConfig */
 /** @typedef {import('@wdk/wallet-ton-gasless').TonGaslessWalletConfig} TonGaslessWalletConfig */
 
+/** @typedef {import('@wdk/wallet-btc').BtcWalletConfig} BtcWalletConfig */
+
 /** @typedef {import('@wdk/wallet-spark').SparkWalletConfig} SparkWalletConfig */
 
 /** @typedef {import('@wdk/wallet-tron').TronWalletConfig} TronWalletConfig */
@@ -39,6 +41,7 @@ import * as bip39 from 'bip39'
  * @property {Seed} arbitrum - The arbitrum's wallet seed phrase.
  * @property {Seed} polygon - The polygon's wallet seed phrase.
  * @property {Seed} ton - The ton's wallet seed phrase.
+ * @property {Seed} bitcoin - The bitcoin's wallet seed phrase.
  * @property {Seed} spark - The spark's wallet seed phrase.
  * @property {Seed} tron - The tron's wallet seed phrase.
  */
@@ -49,6 +52,7 @@ import * as bip39 from 'bip39'
  * @property {EvmWalletConfig | EvmErc4337WalletConfig} arbitrum - The arbitrum blockchain configuration.
  * @property {EvmWalletConfig | EvmErc4337WalletConfig} polygon - The polygon blockchain configuration.
  * @property {TonWalletConfig | TonGaslessWalletConfig} ton - The ton blockchain configuration.
+ * @property {BtcWalletConfig} bitcoin - The bitcoin blockchain configuration.
  * @property {SparkWalletConfig} spark - The spark blockchain configuration.
  * @property {TronWalletConfig} tron - The tron blockchain configuration.
  */
@@ -70,6 +74,7 @@ export const Blockchain = {
   Arbitrum: 'arbitrum',
   Polygon: 'polygon',
   Ton: 'ton',
+  Bitcoin: 'bitcoin',
   Spark: 'spark',
   Tron: 'tron'
 }
@@ -323,6 +328,18 @@ export default class WdkManager {
     return await account.quoteTransfer(options, config)
   }
 
+  /** Disposes all the wallet accounts, erasing their private keys from the memory. */
+  dispose () {
+    for (const blockchain in this._wallets) {
+      this._wallets[blockchain].dispose()
+    }
+
+    for (const blockchain in this._account_abstraction_wallets) {
+      this._account_abstraction_wallets[blockchain].dispose()
+    }
+  }
+
+  /** @private */
   async _getWalletManager (blockchain) {
     if (!Object.values(Blockchain).includes(blockchain)) {
       throw new Error(`Unsupported blockchain: ${blockchain}.`)
@@ -345,6 +362,11 @@ export default class WdkManager {
 
         this._wallets.ton = new WalletManagerTon(seed, config.ton)
       }
+      else if (blockchain === 'bitcoin') {
+        const { default: WalletManagerBtc } = await import('@wdk/wallet-btc')
+
+        this._wallets.bitcoin = new WalletManagerBtc(seed, config.bitcoin)
+      }
       else if (blockchain === 'spark') {
         const { default: WalletManagerSpark } = await import('@wdk/wallet-spark')
 
@@ -360,6 +382,7 @@ export default class WdkManager {
     return this._wallets[blockchain]
   }
 
+  /** @private */
   async _getWalletManagerWithAccountAbstraction (blockchain) {
     if (![...EVM_BLOCKCHAINS, Blockchain.Ton].includes(blockchain)) {
       throw new Error(`Account abstraction unsupported for blockchain: ${blockchain}.`)
