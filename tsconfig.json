@@ -1,8 +1,7 @@
 {
   "include": [
     "index.js",
-    "src/wdk-manager.js",
-    "src/wallet-account.js"
+    "src/wdk-manager.js"
   ],
   "compilerOptions": {
     "target": "ES2015",
@@ -12,6 +11,9 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "noResolve": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "typeRoots": [
+      "./node_modules/@wdk"
+    ]
   }
 }

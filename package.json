@@ -1,6 +1,6 @@
 {
   "name": "@wdk/core",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -11,19 +11,20 @@
     "lint:fix": "standard --fix"
   },
   "dependencies": {
-    "@wdk/account-abstraction-evm": "https://github.com/davi0kprogramsthings/wdk-account-abstraction-evm#develop",
-    "@wdk/account-abstraction-ton": "https://github.com/tetherto/wdk-account-abstraction-ton#v1.0.0-beta.1",
-    "@wdk/wallet-btc": "https://github.com/tetherto/wdk-wallet-btc#v1.0.0-beta.1",
-    "@wdk/wallet-evm": "https://github.com/tetherto/wdk-wallet-evm#v1.0.0-beta.1",
-    "@wdk/wallet-spark": "https://github.com/tetherto/wdk-wallet-spark#v1.0.0-beta.1",
-    "@wdk/wallet-ton": "https://github.com/tetherto/wdk-wallet-ton#v1.0.0-beta.1",
-    "bip39": "^3.1.0"
+    "@wdk/wallet": "https://github.com/tetherto/wdk-wallet#develop",
+    "@wdk/wallet-evm": "https://github.com/tetherto/wdk-wallet-evm#develop",
+    "@wdk/wallet-evm-erc-4337": "https://github.com/vlad0k/wdk-wallet-evm-erc-4337#develop",
+    "@wdk/wallet-spark": "https://github.com/tetherto/wdk-wallet-spark#develop",
+    "@wdk/wallet-ton": "https://github.com/tetherto/wdk-wallet-ton#develop",
+    "@wdk/wallet-ton-gasless": "https://github.com/AlonzoRicardo/wdk-wallet-ton-gasless#develop",
+    "@wdk/wallet-tron": "https://github.com/itsdeka/wdk-wallet-tron-main-1",
+    "bip39": "3.1.0"
   },
   "devDependencies": {
-    "jsdoc": "^4.0.4",
-    "rimraf": "^6.0.1",
-    "standard": "^17.1.2",
-    "typescript": "^5.8.3"
+    "jsdoc": "4.0.4",
+    "rimraf": "6.0.1",
+    "standard": "17.1.2",
+    "typescript": "5.8.3"
   },
   "author": "Tether",
   "license": "Apache-2.0"
