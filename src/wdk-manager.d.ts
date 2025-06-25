@@ -7,6 +7,7 @@ export namespace Blockchain {
     let Arbitrum: string;
     let Polygon: string;
     let Ton: string;
+    let Bitcoin: string;
     let Spark: string;
     let Tron: string;
 }
@@ -185,8 +186,12 @@ export default class WdkManager {
      * console.log("Gas cost in paymaster token:", quote.fee);
      */
     quoteTransfer(blockchain: Blockchain, accountIndex: number, options: TransferOptions, config?: TransferConfig): Promise<Omit<TransferResult, "hash">>;
-    _getWalletManager(blockchain: any): Promise<any>;
-    _getWalletManagerWithAccountAbstraction(blockchain: any): Promise<any>;
+    /** Disposes all the wallet accounts, erasing their private keys from the memory. */
+    dispose(): void;
+    /** @private */
+    private _getWalletManager;
+    /** @private */
+    private _getWalletManagerWithAccountAbstraction;
 }
 export type FeeRates = import("@wdk/wallet").FeeRates;
 export type TransferOptions = import("@wdk/wallet").TransferOptions;
@@ -196,6 +201,7 @@ export type EvmWalletConfig = import("@wdk/wallet-evm").EvmWalletConfig;
 export type EvmErc4337WalletConfig = import("@wdk/wallet-evm-erc-4337").EvmErc4337WalletConfig;
 export type TonWalletConfig = import("@wdk/wallet-ton").TonWalletConfig;
 export type TonGaslessWalletConfig = import("@wdk/wallet-ton-gasless").TonGaslessWalletConfig;
+export type BtcWalletConfig = import("@wdk/wallet-btc").BtcWalletConfig;
 export type SparkWalletConfig = import("@wdk/wallet-spark").SparkWalletConfig;
 export type TronWalletConfig = import("@wdk/wallet-tron").TronWalletConfig;
 export type Seed = string | Uint8Array;
@@ -216,6 +222,10 @@ export type Seeds = {
      * - The ton's wallet seed phrase.
      */
     ton: Seed;
+    /**
+     * - The bitcoin's wallet seed phrase.
+     */
+    bitcoin: Seed;
     /**
      * - The spark's wallet seed phrase.
      */
@@ -242,6 +252,10 @@ export type WdkConfig = {
      * - The ton blockchain configuration.
      */
     ton: TonWalletConfig | TonGaslessWalletConfig;
+    /**
+     * - The bitcoin blockchain configuration.
+     */
+    bitcoin: BtcWalletConfig;
     /**
      * - The spark blockchain configuration.
      */
