@@ -14,10 +14,10 @@
     "@wdk/wallet": "https://github.com/tetherto/wdk-wallet#develop",
     "@wdk/wallet-btc": "https://github.com/tetherto/wdk-wallet-btc#develop",
     "@wdk/wallet-evm": "https://github.com/tetherto/wdk-wallet-evm#develop",
-    "@wdk/wallet-evm-erc-4337": "https://github.com/vlad0k/wdk-wallet-evm-erc-4337#develop",
+    "@wdk/wallet-evm-erc-4337": "https://github.com/tetherto/wdk-wallet-evm-erc-4337#develop",
     "@wdk/wallet-spark": "https://github.com/tetherto/wdk-wallet-spark#develop",
     "@wdk/wallet-ton": "https://github.com/tetherto/wdk-wallet-ton#develop",
-    "@wdk/wallet-ton-gasless": "https://github.com/AlonzoRicardo/wdk-wallet-ton-gasless#develop",
+    "@wdk/wallet-ton-gasless": "https://github.com/tetherto/wdk-wallet-ton-gasless#develop",
     "@wdk/wallet-tron": "https://github.com/itsdeka/wdk-wallet-tron-main-1",
     "bip39": "3.1.0"
   },
