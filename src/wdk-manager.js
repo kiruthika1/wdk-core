@@ -27,11 +27,14 @@ import * as bip39 from 'bip39'
 /** @typedef {import('@wdk/wallet-ton').TonWalletConfig} TonWalletConfig */
 /** @typedef {import('@wdk/wallet-ton-gasless').TonGaslessWalletConfig} TonGaslessWalletConfig */
 
+/** @typedef {import('@wdk/wallet-tron').TronWalletConfig} TronWalletConfig */
+/** @typedef {import('@wdk/wallet-tron-gasfree').TronGasfreeWalletConfig} TronGasfreeWalletConfig */
+
 /** @typedef {import('@wdk/wallet-btc').BtcWalletConfig} BtcWalletConfig */
 
 /** @typedef {import('@wdk/wallet-spark').SparkWalletConfig} SparkWalletConfig */
 
-/** @typedef {import('@wdk/wallet-tron').TronWalletConfig} TronWalletConfig */
+/** @typedef {import('@wdk/wallet-solana').SolanaWalletConfig} SolanaWalletConfig */
 
 /** @typedef {string | Uint8Array} Seed */
 
@@ -41,9 +44,10 @@ import * as bip39 from 'bip39'
  * @property {Seed} arbitrum - The arbitrum's wallet seed phrase.
  * @property {Seed} polygon - The polygon's wallet seed phrase.
  * @property {Seed} ton - The ton's wallet seed phrase.
+ * @property {Seed} tron - The tron's wallet seed phrase.
  * @property {Seed} bitcoin - The bitcoin's wallet seed phrase.
  * @property {Seed} spark - The spark's wallet seed phrase.
- * @property {Seed} tron - The tron's wallet seed phrase.
+ * @property {Seed} solana - The solana's wallet seed phrase.
  */
 
 /**
@@ -52,9 +56,10 @@ import * as bip39 from 'bip39'
  * @property {EvmWalletConfig | EvmErc4337WalletConfig} arbitrum - The arbitrum blockchain configuration.
  * @property {EvmWalletConfig | EvmErc4337WalletConfig} polygon - The polygon blockchain configuration.
  * @property {TonWalletConfig | TonGaslessWalletConfig} ton - The ton blockchain configuration.
+ * @property {TronWalletConfig | TronGasfreeWalletConfig} tron - The tron blockchain configuration.
  * @property {BtcWalletConfig} bitcoin - The bitcoin blockchain configuration.
  * @property {SparkWalletConfig} spark - The spark blockchain configuration.
- * @property {TronWalletConfig} tron - The tron blockchain configuration.
+ * @property {SolanaWalletConfig} solana - The solana blockchain configuration.
  */
 
 /**
@@ -74,9 +79,10 @@ export const Blockchain = {
   Arbitrum: 'arbitrum',
   Polygon: 'polygon',
   Ton: 'ton',
+  Tron: 'tron',
   Bitcoin: 'bitcoin',
   Spark: 'spark',
-  Tron: 'tron'
+  Solana: 'solana'
 }
 
 const EVM_BLOCKCHAINS = [
@@ -362,6 +368,11 @@ export default class WdkManager {
 
         this._wallets.ton = new WalletManagerTon(seed, config.ton)
       }
+      else if (blockchain === 'tron') {
+        const { default: WalletManagerTron } = await import('@wdk/wallet-tron')
+
+        this._wallets.tron = new WalletManagerTron(seed, config.tron)
+      }
       else if (blockchain === 'bitcoin') {
         const { default: WalletManagerBtc } = await import('@wdk/wallet-btc')
 
@@ -372,10 +383,10 @@ export default class WdkManager {
 
         this._wallets.spark = new WalletManagerSpark(seed, config.spark)
       }
-      else if (blockchain === 'tron') {
-        const { default: WalletManagerTron } = await import('@wdk/wallet-tron')
+      else if (blockchain === 'solana') {
+        const { default: WalletManagerSolana } = await import('@wdk/wallet-solana')
 
-        this._wallets.tron = new WalletManagerTron(seed, config.tron)
+        this._wallets.solana = new WalletManagerSolana(seed, config.solana)
       }
     }
 
@@ -384,7 +395,7 @@ export default class WdkManager {
 
   /** @private */
   async _getWalletManagerWithAccountAbstraction (blockchain) {
-    if (![...EVM_BLOCKCHAINS, Blockchain.Ton].includes(blockchain)) {
+    if (![...EVM_BLOCKCHAINS, Blockchain.Ton, Blockchain.Tron].includes(blockchain)) {
       throw new Error(`Account abstraction unsupported for blockchain: ${blockchain}.`)
     }
 
@@ -404,6 +415,11 @@ export default class WdkManager {
         const { default: WalletManagerTonGasless } = await import('@wdk/wallet-ton-gasless')
         
         this._account_abstraction_wallets.ton = new WalletManagerTonGasless(seed, config.ton)
+      }
+      else if (blockchain === 'tron') {
+        const { default: WalletManagerTronGasfree } = await import('@wdk/wallet-tron-gasfree')
+        
+        this._account_abstraction_wallets.tron = new WalletManagerTronGasfree(seed, config.tron)
       }
     }
 
