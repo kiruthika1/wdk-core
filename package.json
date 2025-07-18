@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "build:types": "rimraf *.d.ts **/*.d.ts; tsc",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "docs": "jsdoc -r . --destination ./docs",
     "lint": "standard",
     "lint:fix": "standard --fix"
@@ -15,10 +14,12 @@
     "@wdk/wallet-btc": "https://github.com/tetherto/wdk-wallet-btc#develop",
     "@wdk/wallet-evm": "https://github.com/tetherto/wdk-wallet-evm#develop",
     "@wdk/wallet-evm-erc-4337": "https://github.com/tetherto/wdk-wallet-evm-erc-4337#develop",
+    "@wdk/wallet-solana": "https://github.com/tetherto/wdk-wallet-solana#develop",
     "@wdk/wallet-spark": "https://github.com/tetherto/wdk-wallet-spark#develop",
     "@wdk/wallet-ton": "https://github.com/tetherto/wdk-wallet-ton#develop",
     "@wdk/wallet-ton-gasless": "https://github.com/tetherto/wdk-wallet-ton-gasless#develop",
-    "@wdk/wallet-tron": "https://github.com/itsdeka/wdk-wallet-tron-main-1",
+    "@wdk/wallet-tron": "https://github.com/tetherto/wdk-wallet-tron#develop",
+    "@wdk/wallet-tron-gasfree": "https://github.com/tetherto/wdk-wallet-tron-gasfree#develop",
     "bip39": "3.1.0"
   },
   "devDependencies": {
