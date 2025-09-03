@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.base.json",
+  "include": ["index.js"],
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "typeRoots": ["./node_modules/@wdk"],
+    "outDir": "types"
+  }
+}

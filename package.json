@@ -3,8 +3,11 @@
   "version": "1.0.0-beta.2",
   "main": "index.js",
   "type": "module",
+  "types": "./types",
   "scripts": {
-    "build:types": "rimraf *.d.ts **/*.d.ts; tsc",
+    "build:types": "npm run build:types:new && npm run build:types:index",
+    "build:types:new": "rimraf types && tsc --project tsconfig.json",
+    "build:types:index": "tsc --project tsconfig.index.json",
     "docs": "jsdoc -r . --destination ./docs",
     "lint": "standard",
     "lint:fix": "standard --fix"
