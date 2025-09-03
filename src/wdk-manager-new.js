@@ -62,13 +62,43 @@ class WdkManager {
   }
 
   /**
+   * Static Method to create a new random seed phrase.
+   *
+   * @returns {string} The seed phrase.
+   *
+   * @example
+   * const seed = WdkManager.getRandomSeedPhrase()
+   * console.log(seed)
+   */
+  static getRandomSeedPhrase () {
+    return WdkWallet.getRandomSeedPhrase()
+  }
+
+  /**
+   * Static Method to check if a seed phrase is valid.
+   *
+   * @param {string} seed - The seed phrase.
+   * @returns {boolean} True if the seed phrase is valid.
+   */
+
+  /**
+   * Static Method to check if a seed phrase is valid.
+   *
+   * @param {string} seed - The seed phrase.
+   * @returns {boolean} True if the seed phrase is valid.
+   */
+  static isValidSeedPhrase (seed) {
+    return WdkWallet.isValidSeedPhrase(seed)
+  }
+
+  /**
  * Registers a new wallet to the wdk manager.
  *
- * @description Registers a wallet class for a specific blockchain. The wallet will be instantiated
+ * @description Registers a wallet class for a specific blockchain. The wallet's account will be instantiated
  * when first accessed via getAccount() or getAccountByPath(). This method supports method chaining.
  *
  * @template {typeof WdkWallet} W
- * @param {string} blockchain - The name of the blockchain the wallet must be bound to (e.g., "ethereum", "bitcoin").
+ * @param {string} blockchain - The name of the blockchain the wallet must be bound to (e.g., "ethereum", "spark").
  * @param {W} wallet - The wallet manager class constructor that extends WdkWallet.
  * @param {ConstructorParameters<W>[1]} config - The configuration object passed to the wallet constructor.
  * @returns {WdkManager} Returns this instance for method chaining.
@@ -77,7 +107,7 @@ class WdkManager {
  * @example
  * import WdkManager from '@wdk/core'
  * import WalletManagerEvm from '@wdk/wallet-evm'
- * import WalletManagerBtc from '@wdk/wallet-btc'
+ * import WalletManagerSpark from '@wdk/wallet-spark'
  *
  * const wdk = new WdkManager('...')
  * wdk.registerWallet('ethereum', WalletManagerEvm, { rpcUrl: 'https://yourURL' })
@@ -162,6 +192,37 @@ class WdkManager {
     const wallet = this._wallets.get(blockchain)
 
     return await wallet.getAccountByPath(path)
+  }
+
+  /**
+   * Get the wallet FeeRates for the specified blockchain.
+   *
+   * @param {string} blockchain - The name of the blockchain.
+   * @returns {Promise<FeeRates>} The fee rates.
+   */
+  /**
+   * Get the wallet FeeRates for the specified blockchain.
+   *
+   * @param {string} blockchain - The name of the blockchain.
+   * @returns {Promise<FeeRates>} The fee rates.
+   */
+  async getFeeRates (blockchain) {
+    if (!this._wallets.has(blockchain)) {
+      throw new Error(`No wallet registered for blockchain: ${blockchain}`)
+    }
+
+    /** Get the wallet instance
+     * @type {WdkWallet}
+     * @description The wallet instance.
+     * @example
+     * const wdk = new WdkManager('...')
+     * wdk.registerWallet('ethereum', WalletManagerEvm, ethereumWalletConfig)
+     * const feeRates = await wdk.getFeeRates('ethereum')
+     * console.log(feeRates)
+     */
+    const wallet = this._wallets.get(blockchain)
+
+    return await wallet.getFeeRates()
   }
 
   /**
