@@ -10,7 +10,8 @@
     "build:types:index": "tsc --project tsconfig.index.json",
     "docs": "jsdoc -r . --destination ./docs",
     "lint": "standard",
-    "lint:fix": "standard --fix"
+    "lint:fix": "standard --fix",
+    "test": "brittle test/**/*.js"
   },
   "dependencies": {
     "@wdk/wallet": "https://github.com/tetherto/wdk-wallet#develop",
@@ -26,6 +27,7 @@
     "bip39": "3.1.0"
   },
   "devDependencies": {
+    "brittle": "^3.18.3",
     "jsdoc": "4.0.4",
     "rimraf": "6.0.1",
     "standard": "17.1.2",

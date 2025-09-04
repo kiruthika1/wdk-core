@@ -1,13 +1,19 @@
 export default WdkManager;
-export type WdkWallet = import("@wdk/wallet").WdkWallet;
-export type IWalletAccount = any;
+export type WdkWallet = typeof import("@wdk/wallet");
+export type IWalletAccount = import("@wdk/wallet").default.IWalletAccount;
+export type WalletClass<W extends typeof WdkWallet> = any;
 export type WalletConstructorParameters<W extends typeof WdkWallet> = import("@wdk/wallet").ConstructorParameters<W>;
-/** @typedef {import('@wdk/wallet').WdkWallet} WdkWallet */
-/** @typedef {import('@wdk/wallet').IWalletAccount} IWalletAccount */
+export type FeeRates = import("@wdk/wallet").FeeRates;
+export type WdkManager = WdkWallet.WdkManager;
+/** @typedef {import('@wdk/wallet')} WdkWallet */
+/** @typedef {import('@wdk/wallet').default.IWalletAccount} IWalletAccount */
 /**
  * @template {typeof WdkWallet} W
+ * @typedef {import('@wdk/wallet').default} WalletClass
  * @typedef {import('@wdk/wallet').ConstructorParameters<W>} WalletConstructorParameters
  */
+/** @typedef {import('@wdk/wallet').FeeRates} FeeRates */
+/** @typedef {WdkWallet.WdkManager} WdkManager */
 /**
  * Wallet Development Kit Manager
  *
@@ -48,6 +54,13 @@ declare class WdkManager {
      */
     static isValidSeedPhrase(seed: string): boolean;
     /**
+     * Static Method to check if a seed bytes is valid.
+     *
+     * @param {Uint8Array} seedBytes - The seed bytes.
+     * @returns {boolean} True if the seed bytes is valid.
+     */
+    static isValidSeedBytes(seedBytes: Uint8Array): boolean;
+    /**
    * Creates a new wallet development kit manager.
    *
    * @description Initializes a new WdkManager instance with a BIP-39 seed phrase that will be used
@@ -66,11 +79,12 @@ declare class WdkManager {
    */
     constructor(seed: string | Uint8Array);
     /** @private
-     * @type {string | Uint8Array}
+     * @type {String | Uint8Array}
      * @description The wallet's BIP-39 seed phrase.
      * @example
      * const wdk = new WdkManager('...')
      * console.log(wdk._seed)
+     * TODO: offuscate the seed with cryptography
      */
     private _seed;
     /** @private
@@ -88,9 +102,9 @@ declare class WdkManager {
    * @description Registers a wallet class for a specific blockchain. The wallet's account will be instantiated
    * when first accessed via getAccount() or getAccountByPath(). This method supports method chaining.
    *
-   * @template {typeof WdkWallet} W
+   * @template {typeof WalletClass} W
    * @param {string} blockchain - The name of the blockchain the wallet must be bound to (e.g., "ethereum", "spark").
-   * @param {W} wallet - The wallet manager class constructor that extends WdkWallet.
+   * @param {W} WalletClass - The wallet manager class constructor that extends WdkWallet.
    * @param {ConstructorParameters<W>[1]} config - The configuration object passed to the wallet constructor.
    * @returns {WdkManager} Returns this instance for method chaining.
    * @throws {Error} If blockchain is not a string or wallet is not a class constructor.
@@ -104,7 +118,7 @@ declare class WdkManager {
    * wdk.registerWallet('ethereum', WalletManagerEvm, { rpcUrl: 'https://yourURL' })
    *    .registerWallet('spark', WalletManagerSpark, { network: 'REGTEST' })
    */
-    registerWallet<W extends typeof WdkWallet>(blockchain: string, wallet: W, config: ConstructorParameters<W>[1]): WdkManager;
+    registerWallet<W extends typeof WalletClass>(blockchain: string, WalletClass: W, config: ConstructorParameters<W>[1]): WdkManager;
     /**
      * Get a wallet account for the specified blockchain.
      *
