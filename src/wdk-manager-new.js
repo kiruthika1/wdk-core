@@ -1,17 +1,17 @@
 import WdkWallet from '@wdk/wallet'
 
-/** @typedef {import('@wdk/wallet')} WdkWallet */
+/**
+ *  @type {import('@wdk/wallet').default as WdkWallet} WdkWallet */
 
-/** @typedef {import('@wdk/wallet').default.IWalletAccount} IWalletAccount */
-
+/** @type {import("@wdk/wallet").IWalletAccount} */
 /**
  * @template {typeof WdkWallet} W
- * @typedef {import('@wdk/wallet').default} WalletClass
- * @typedef {import('@wdk/wallet').ConstructorParameters<W>} WalletConstructorParameters
+ * @typedef {ConstructorParameters<W>} WalletConstructorParameters
  */
 
-/** @typedef {import('@wdk/wallet').FeeRates} FeeRates */
-/** @typedef {WdkWallet.WdkManager} WdkManager */
+/**
+ * @import {FeeRates} from "@wdk/wallet"
+*/
 
 /**
  * Wallet Development Kit Manager
@@ -120,9 +120,8 @@ class WdkManager {
  * @description Registers a wallet class for a specific blockchain. The wallet's account will be instantiated
  * when first accessed via getAccount() or getAccountByPath(). This method supports method chaining.
  *
- * @template {typeof WalletClass} W
  * @param {string} blockchain - The name of the blockchain the wallet must be bound to (e.g., "ethereum", "spark").
- * @param {W} WalletClass - The wallet manager class constructor that extends WdkWallet.
+ * @param {W} WdkWallet - The wallet manager class constructor that extends WdkWallet.
  * @param {ConstructorParameters<W>[1]} config - The configuration object passed to the wallet constructor.
  * @returns {WdkManager} Returns this instance for method chaining.
  * @throws {Error} If blockchain is not a string or wallet is not a class constructor.
