@@ -73,7 +73,7 @@ class WdkManager {
   }
 
   /**
-   * Static Method to create a new random seed phrase.
+   * Returns a random [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) seed phrase.
    *
    * @returns {string} The seed phrase.
    *
