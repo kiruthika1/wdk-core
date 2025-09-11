@@ -23,7 +23,7 @@ import WdkWallet from '@wdk/wallet'
  * import WdkManager from '@wdk/core'
  * import WalletManagerEvm from '@wdk/wallet-evm'
  *
- * const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+ * const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
  * wdk.registerWallet('ethereum', WalletManagerEvm, { rpcUrl: 'https://yourURL' })
  * const account = await wdk.getAccount('ethereum', 0)
  * console.log(await account.getAddress())
