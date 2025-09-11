@@ -55,7 +55,7 @@ class WdkManager {
  *
  * @example
  * // Using string mnemonic
- * const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+ * const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
  *
  * // Using Uint8Array
  * const seedBytes = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])

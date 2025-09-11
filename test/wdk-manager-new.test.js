@@ -26,7 +26,7 @@ class MockWallet extends WalletManager {
 
 // Constructor tests
 test('constructor -                         ', async (t) => {
-  const validSeed = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
+  const validSeed = 'test only example nut use this real life secret phrase must random'
   const wdk = new WdkManager(validSeed)
 
   t.ok(wdk instanceof WdkManager, 'should be instance of WdkManager')
@@ -93,7 +93,7 @@ test('getRandomSeedPhrase - should return different seeds on multiple calls', as
 })
 
 test('isValidSeedPhrase - should return true for valid seed phrase', async (t) => {
-  const validSeed = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
+  const validSeed = 'test only example nut use this real life secret phrase must random'
   const isValid = WdkManager.isValidSeed(validSeed)
 
   t.is(isValid, true, 'should return true for valid seed phrase')
@@ -120,7 +120,7 @@ test('isValidSeedPhrase - should return false for non-string input', async (t) =
 
 // registerWallet tests
 test('registerWallet - should register wallet successfully', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
   const config = { rpcUrl: 'https://test.com' }
 
   const result = wdk.registerWallet('ethereum', MockWallet, config)
@@ -131,7 +131,7 @@ test('registerWallet - should register wallet successfully', async (t) => {
 })
 
 test('registerWallet - should support method chaining', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
 
   const result = wdk
     .registerWallet('ethereum', MockWallet, { rpcUrl: 'https://eth.com' })
@@ -144,7 +144,7 @@ test('registerWallet - should support method chaining', async (t) => {
 })
 
 test('registerWallet - should throw error for non-string blockchain', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
 
   try {
     wdk.registerWallet(123, MockWallet, {})
@@ -155,7 +155,7 @@ test('registerWallet - should throw error for non-string blockchain', async (t) 
 })
 
 test('registerWallet - should throw error for non-function wallet', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
 
   try {
     wdk.registerWallet('ethereum', 'not-a-function', {})
@@ -166,7 +166,7 @@ test('registerWallet - should throw error for non-function wallet', async (t) =>
 })
 
 test('registerWallet - should throw error for null wallet', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
 
   try {
     wdk.registerWallet('ethereum', null, {})
@@ -177,7 +177,7 @@ test('registerWallet - should throw error for null wallet', async (t) => {
 })
 
 test('registerWallet - should overwrite existing wallet', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
   const config1 = { rpcUrl: 'https://first.com' }
   const config2 = { rpcUrl: 'https://second.com' }
 
@@ -190,7 +190,7 @@ test('registerWallet - should overwrite existing wallet', async (t) => {
 
 // getAccount tests
 test('getAccount - should return account for registered blockchain', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
   wdk.registerWallet('ethereum', MockWallet, { rpcUrl: 'https://test.com' })
 
   const account = await wdk.getAccount('ethereum', 0)
@@ -201,7 +201,7 @@ test('getAccount - should return account for registered blockchain', async (t) =
 })
 
 test('getAccount - should use default index 0', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
   wdk.registerWallet('ethereum', MockWallet, { rpcUrl: 'https://test.com' })
 
   const account = await wdk.getAccount('ethereum')
@@ -211,7 +211,7 @@ test('getAccount - should use default index 0', async (t) => {
 })
 
 test('getAccount - should return different accounts for different indices', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
   wdk.registerWallet('ethereum', MockWallet, { rpcUrl: 'https://test.com' })
 
   const account1 = await wdk.getAccount('ethereum', 0)
@@ -223,7 +223,7 @@ test('getAccount - should return different accounts for different indices', asyn
 })
 
 test('getAccount - should throw error for unregistered blockchain', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
 
   await t.exception(async () => {
     await wdk.getAccount('unregistered', 0)
@@ -231,7 +231,7 @@ test('getAccount - should throw error for unregistered blockchain', async (t) =>
 })
 
 test('getAccount - should throw error for empty blockchain name', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
 
   await t.exception(async () => {
     await wdk.getAccount('', 0)
@@ -239,7 +239,7 @@ test('getAccount - should throw error for empty blockchain name', async (t) => {
 })
 
 test('getAccount - should throw error for null blockchain name', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
 
   await t.exception(async () => {
     await wdk.getAccount(null, 0)
@@ -248,7 +248,7 @@ test('getAccount - should throw error for null blockchain name', async (t) => {
 
 // getAccountByPath tests
 test('getAccountByPath - should return account for registered blockchain', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
   wdk.registerWallet('ethereum', MockWallet, { rpcUrl: 'https://test.com' })
 
   const account = await wdk.getAccountByPath('ethereum', 'm/44\'/60\'/0\'/0/0')
@@ -259,7 +259,7 @@ test('getAccountByPath - should return account for registered blockchain', async
 })
 
 test('getAccountByPath - should return different accounts for different paths', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
   wdk.registerWallet('ethereum', MockWallet, { rpcUrl: 'https://test.com' })
 
   const account1 = await wdk.getAccountByPath('ethereum', 'm/44\'/60\'/0\'/0/0')
@@ -270,7 +270,7 @@ test('getAccountByPath - should return different accounts for different paths', 
 })
 
 test('getAccountByPath - should throw error for unregistered blockchain', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
 
   await t.exception(async () => {
     await wdk.getAccountByPath('unregistered', 'm/44\'/60\'/0\'/0/0')
@@ -278,7 +278,7 @@ test('getAccountByPath - should throw error for unregistered blockchain', async 
 })
 
 test('getAccountByPath - should throw error for empty blockchain name', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
 
   await t.exception(async () => {
     await wdk.getAccountByPath('', 'm/44\'/60\'/0\'/0/0')
@@ -286,7 +286,7 @@ test('getAccountByPath - should throw error for empty blockchain name', async (t
 })
 
 test('getAccountByPath - should throw error for null blockchain name', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
 
   await t.exception(async () => {
     await wdk.getAccountByPath(null, 'm/44\'/60\'/0\'/0/0')
@@ -295,7 +295,7 @@ test('getAccountByPath - should throw error for null blockchain name', async (t)
 
 // getFeeRates tests
 test('getFeeRates - should return fee rates for registered blockchain', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
   wdk.registerWallet('ethereum', MockWallet, { rpcUrl: 'https://test.com' })
 
   const feeRates = await wdk.getFeeRates('ethereum')
@@ -306,7 +306,7 @@ test('getFeeRates - should return fee rates for registered blockchain', async (t
 })
 
 test('getFeeRates - should throw error for unregistered blockchain', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
 
   await t.exception(async () => {
     await wdk.getFeeRates('unregistered')
@@ -314,7 +314,7 @@ test('getFeeRates - should throw error for unregistered blockchain', async (t) =
 })
 
 test('getFeeRates - should throw error for empty blockchain name', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
 
   await t.exception(async () => {
     await wdk.getFeeRates('')
@@ -322,7 +322,7 @@ test('getFeeRates - should throw error for empty blockchain name', async (t) => 
 })
 
 test('getFeeRates - should throw error for null blockchain name', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
 
   await t.exception(async () => {
     await wdk.getFeeRates(null)
@@ -331,7 +331,7 @@ test('getFeeRates - should throw error for null blockchain name', async (t) => {
 
 // dispose tests
 test('dispose - should dispose all registered wallets', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
 
   // Create a mock wallet with dispose method
   class DisposableMockWallet extends MockWallet {
@@ -359,7 +359,7 @@ test('dispose - should dispose all registered wallets', async (t) => {
 })
 
 test('dispose - should handle wallets without dispose method', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
   wdk.registerWallet('ethereum', MockWallet, { rpcUrl: 'https://test.com' })
 
   // Should not throw error
@@ -369,7 +369,7 @@ test('dispose - should handle wallets without dispose method', async (t) => {
 })
 
 test('dispose - should work with empty wallet map', async (t) => {
-  const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+  const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
 
   // Should not throw error
   await wdk.dispose()
