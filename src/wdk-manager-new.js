@@ -239,9 +239,7 @@ class WdkManager {
    */
   async dispose () {
     for (const [, walletInstance] of this._wallets) {
-      if (typeof walletInstance.dispose === 'function') {
-        walletInstance.dispose()
-      }
+      walletInstance.dispose()
     }
   }
 }
