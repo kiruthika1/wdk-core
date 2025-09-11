@@ -1,11 +1,11 @@
 export default WdkManager;
-export { WdkWallet };
-export type WalletConstructorParameters<W extends typeof WdkWallet> = ConstructorParameters<W>;
+export { WalletManager };
+export type WalletConstructorParameters<W extends typeof WalletManager> = ConstructorParameters<W>;
 /**
- *  @type {import('@wdk/wallet').default as WdkWallet} WdkWallet */
+ *  @type {import('@wdk/wallet').default as WalletManager} WalletManager */
 /** @type {import("@wdk/wallet").IWalletAccount} */
 /**
- * @template {typeof WdkWallet} W
+ * @template {typeof WalletManager} W
  * @typedef {ConstructorParameters<W>} WalletConstructorParameters
  */
 /**
@@ -24,11 +24,12 @@ export type WalletConstructorParameters<W extends typeof WdkWallet> = Constructo
  * const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
  * wdk.registerWallet('ethereum', WalletManagerEvm, { rpcUrl: 'https://yourURL' })
  * const account = await wdk.getAccount('ethereum', 0)
- * console.log(await account.getAddress())
+ * // Output: "Account m/44'/60'/0'/0/0: 0x123..."
+ * console.log("Account m/44'/60'/0'/0/0:", await account.getAddress())
  */
 declare class WdkManager {
     /**
-     * Static Method to create a new random seed phrase.
+     * Returns a random [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) seed phrase.
      *
      * @returns {string} The seed phrase.
      *
@@ -38,25 +39,14 @@ declare class WdkManager {
      */
     static getRandomSeedPhrase(): string;
     /**
-     * Static Method to check if a seed phrase is valid.
+     * Checks if a seed is valid.
      *
-     * @param {string} seed - The seed phrase.
-     * @returns {boolean} True if the seed phrase is valid.
+     * @param {string | Uint8Array} seed - The seed.
+     * @returns {boolean} True if the seed is valid.
+     * @param {string | Uint8Array} seed - The seed.
+     * @returns {boolean} True if the seed is valid.
      */
-    /**
-     * Static Method to check if a seed phrase is valid.
-     *
-     * @param {string} seed - The seed phrase.
-     * @returns {boolean} True if the seed phrase is valid.
-     */
-    static isValidSeedPhrase(seed: string): boolean;
-    /**
-     * Static Method to check if a seed bytes is valid.
-     *
-     * @param {Uint8Array} seedBytes - The seed bytes.
-     * @returns {boolean} True if the seed bytes is valid.
-     */
-    static isValidSeedBytes(seedBytes: Uint8Array): boolean;
+    static isValidSeed(seed: string | Uint8Array): boolean;
     /**
    * Creates a new wallet development kit manager.
    *
@@ -75,22 +65,23 @@ declare class WdkManager {
    * const wdk = new WdkManager(seedBytes)
    */
     constructor(seed: string | Uint8Array);
-    /** @private
+    /**
+     * @private
      * @type {String | Uint8Array}
      * @description The wallet's BIP-39 seed phrase.
+     * @todo obfuscate the seed with cryptography
      * @example
      * const wdk = new WdkManager('...')
      * console.log(wdk._seed)
-     * TODO: offuscate the seed with cryptography
      */
     private _seed;
     /** @private
-     * @type {Map<string, WdkWallet>}
+     * @type {Map<string, WalletManager>}
      * @description A map of registered wallet instances keyed by blockchain name.
      * @example
      * const wdk = new WdkManager('...')
      * wdk.registerWallet('ethereum', WalletManagerEvm, ethereumConfig)
-     * // Now wdk._wallets.get('ethereum') returns a WdkWallet instance
+     * // Now wdk._wallets.get('ethereum') returns a WalletManager instance
      */
     private _wallets;
     /**
@@ -107,7 +98,7 @@ declare class WdkManager {
      *
      * wdk.registerWallet('ethereum', WalletManagerEvm, { rpcUrl: 'https://your-provider-url.com' })
      */
-    registerWallet<W extends typeof WalletManager>(blockchain: string, WalletManager: W, config: ConstructorParameters<W>[1]): WdkManager;
+    registerWallet<W extends typeof WalletManager>(blockchain: string, _WalletManager: any, config: ConstructorParameters<W>[1]): WdkManager;
     /**
      * Get a wallet account for the specified blockchain.
      *
@@ -146,5 +137,5 @@ declare class WdkManager {
      */
     dispose(): Promise<void>;
 }
-import WdkWallet from '@wdk/wallet';
+import WalletManager from '@wdk/wallet';
 import type { FeeRates } from "@wdk/wallet";

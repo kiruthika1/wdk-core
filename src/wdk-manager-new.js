@@ -1,11 +1,11 @@
-import WdkWallet from '@wdk/wallet'
+import WalletManager from '@wdk/wallet'
 
 /**
- *  @type {import('@wdk/wallet').default as WdkWallet} WdkWallet */
+ *  @type {import('@wdk/wallet').default as WalletManager} WalletManager */
 
 /** @type {import("@wdk/wallet").IWalletAccount} */
 /**
- * @template {typeof WdkWallet} W
+ * @template {typeof WalletManager} W
  * @typedef {ConstructorParameters<W>} WalletConstructorParameters
  */
 
@@ -48,11 +48,12 @@ class WdkManager {
  * const wdk = new WdkManager(seedBytes)
  */
   constructor (seed) {
-    if (!WdkManager.isValidSeedPhrase(seed)) {
+    if (!WdkManager.isValidSeed(seed)) {
       throw new Error('Invalid seed phrase')
     }
 
-    /** @private
+    /**
+     * @private
      * @type {String | Uint8Array}
      * @description The wallet's BIP-39 seed phrase.
      * @todo obfuscate the seed with cryptography
@@ -62,18 +63,18 @@ class WdkManager {
      */
     this._seed = seed
     /** @private
-     * @type {Map<string, WdkWallet>}
+     * @type {Map<string, WalletManager>}
      * @description A map of registered wallet instances keyed by blockchain name.
      * @example
      * const wdk = new WdkManager('...')
      * wdk.registerWallet('ethereum', WalletManagerEvm, ethereumConfig)
-     * // Now wdk._wallets.get('ethereum') returns a WdkWallet instance
+     * // Now wdk._wallets.get('ethereum') returns a WalletManager instance
      */
     this._wallets = Object.freeze(new Map())
   }
 
   /**
-   * Static Method to create a new random seed phrase.
+   * Returns a random [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) seed phrase.
    *
    * @returns {string} The seed phrase.
    *
@@ -82,12 +83,14 @@ class WdkManager {
    * console.log(seed)
    */
   static getRandomSeedPhrase () {
-    return WdkWallet.getRandomSeedPhrase()
+    return WalletManager.getRandomSeedPhrase()
   }
 
-   /**
+  /**
    * Checks if a seed is valid.
    *
+   * @param {string | Uint8Array} seed - The seed.
+   * @returns {boolean} True if the seed is valid.
    * @param {string | Uint8Array} seed - The seed.
    * @returns {boolean} True if the seed is valid.
    */
@@ -95,7 +98,7 @@ class WdkManager {
     if (seed instanceof Uint8Array) {
       return seed.length >= 16 && seed.length <= 64
     }
-    
+
     return WalletManager.isValidSeedPhrase(seed)
   }
 
@@ -113,31 +116,31 @@ class WdkManager {
    *
    * wdk.registerWallet('ethereum', WalletManagerEvm, { rpcUrl: 'https://your-provider-url.com' })
    */
-  registerWallet (blockchain, WalletManager, config) {
+  registerWallet (blockchain, _WalletManager, config) {
     if (typeof blockchain !== 'string') {
       throw new Error('Blockchain parameter must be a string')
     }
 
-    if (typeof WalletManager !== 'function') {
+    if (typeof _WalletManager !== 'function') {
       throw new Error('WalletManager parameter must be a class constructor')
     }
 
-    // Check if WalletManager extends WdkWallet
-    if (!(WalletManager.prototype instanceof WdkWallet)) {
+    // Check if WalletManager extends WalletManager
+    if (!(_WalletManager.prototype instanceof WalletManager)) {
       throw new Error('WalletManager must extend WdkWallet')
     }
 
     /**  Create a new wallet instance
-     * @type {WdkWallet}
+     * @type {WalletManager}
      * @description The wallet instance.
      * @example
      * const wdk = new WdkManager('...')
      * wdk.registerWallet('ethereum', WalletManagerEvm, ethereumWalletConfig)
      */
-    const walletInstance = new WalletManager(this._seed, config)
+    const walletInstance = new _WalletManager(this._seed, config)
 
     /** Store the wallet instance
-     * @type {Map<string, WdkWallet>}
+     * @type {Map<string, WalletManager>}
      * @description The wallet instance.
      * @example
      * const wdk = new WdkManager('...')
@@ -162,7 +165,7 @@ class WdkManager {
     }
 
     /** Get the wallet instance
-     * @type {WdkWallet}
+     * @type {WalletManager}
      * @description The wallet instance.
      * @example
      * const wdk = new WdkManager('...')
@@ -188,7 +191,7 @@ class WdkManager {
     }
 
     /** Get the wallet instance
-     * @type {WdkWallet}
+     * @type {WalletManager}
      * @description The wallet instance.
      * @example
      * const wdk = new WdkManager('...')
@@ -217,7 +220,7 @@ class WdkManager {
     }
 
     /** Get the wallet instance
-     * @type {WdkWallet}
+     * @type {WalletManager}
      * @description The wallet instance.
      * @example
      * const wdk = new WdkManager('...')
@@ -243,4 +246,4 @@ class WdkManager {
 }
 
 export default WdkManager
-export { WdkWallet }
+export { WalletManager }

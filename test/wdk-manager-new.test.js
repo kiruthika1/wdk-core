@@ -1,8 +1,8 @@
 import { test } from 'brittle'
-import WdkManager, { WdkWallet } from '../src/wdk-manager-new.js'
+import WdkManager, { WalletManager } from '../src/wdk-manager-new.js'
 
 // Mock wallet class for testing
-class MockWallet extends WdkWallet {
+class MockWallet extends WalletManager {
 //   constructor (seed, config) {
 //     super(seed, config)
 //   }
@@ -80,7 +80,7 @@ test('getRandomSeedPhrase - should return a valid seed phrase', async (t) => {
 
   t.is(typeof seed, 'string', 'should return a string')
   t.ok(seed.length > 0, 'should return non-empty string')
-  t.ok(WdkManager.isValidSeedPhrase(seed), 'should return valid seed phrase')
+  t.ok(WdkManager.isValidSeed(seed), 'should return valid seed phrase')
 })
 
 test('getRandomSeedPhrase - should return different seeds on multiple calls', async (t) => {
@@ -88,32 +88,32 @@ test('getRandomSeedPhrase - should return different seeds on multiple calls', as
   const seed2 = WdkManager.getRandomSeedPhrase()
 
   t.not(seed1, seed2, 'should return different seeds')
-  t.ok(WdkManager.isValidSeedPhrase(seed1), 'first seed should be valid')
-  t.ok(WdkManager.isValidSeedPhrase(seed2), 'second seed should be valid')
+  t.ok(WdkManager.isValidSeed(seed1), 'first seed should be valid')
+  t.ok(WdkManager.isValidSeed(seed2), 'second seed should be valid')
 })
 
 test('isValidSeedPhrase - should return true for valid seed phrase', async (t) => {
   const validSeed = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
-  const isValid = WdkManager.isValidSeedPhrase(validSeed)
+  const isValid = WdkManager.isValidSeed(validSeed)
 
   t.is(isValid, true, 'should return true for valid seed phrase')
 })
 
 test('isValidSeedPhrase - should return false for invalid seed phrase', async (t) => {
   const invalidSeed = 'invalid seed phrase that is not valid'
-  const isValid = WdkManager.isValidSeedPhrase(invalidSeed)
+  const isValid = WdkManager.isValidSeed(invalidSeed)
 
   t.is(isValid, false, 'should return false for invalid seed phrase')
 })
 
 test('isValidSeedPhrase - should return false for empty string', async (t) => {
-  const isValid = WdkManager.isValidSeedPhrase('')
+  const isValid = WdkManager.isValidSeed('')
 
   t.is(isValid, false, 'should return false for empty string')
 })
 
 test('isValidSeedPhrase - should return false for non-string input', async (t) => {
-  const isValid = WdkManager.isValidSeedPhrase(null)
+  const isValid = WdkManager.isValidSeed(null)
 
   t.is(isValid, false, 'should return false for null input')
 })
