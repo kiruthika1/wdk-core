@@ -13,16 +13,6 @@
 // limitations under the License.
 'use strict'
 
-/** @typedef {import('@wdk/wallet').FeeRates} FeeRates */
+/** @typedef {import('./src/wdk-manager.js').default} WdkManager */
 
-/** @typedef {import('@wdk/wallet').TransferOptions} TransferOptions */
-/** @typedef {import('@wdk/wallet').TransferResult} TransferResult */
-/** @typedef {import('@wdk/wallet').IWalletAccount} IWalletAccount */
-
-/** @typedef {import('./src/wdk-manager.js').Seed} Seed */
-/** @typedef {import('./src/wdk-manager.js').Seeds} Seeds */
-/** @typedef {import('./src/wdk-manager.js').WdkConfig} WdkConfig */
-
-/** @typedef {import('./src/wdk-manager.js').TransferConfig} TransferConfig */
-
-export { default, Blockchain } from './src/wdk-manager.js'
+export { default } from './src/wdk-manager.js'

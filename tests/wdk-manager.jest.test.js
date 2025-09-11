@@ -1,5 +1,6 @@
 import { describe, expect, test } from '@jest/globals'
-import WdkManager, { WalletManager } from '../src/wdk-manager-new.js'
+import WdkManager from '../src/wdk-manager.js'
+import WalletManager from '@wdk/wallet'
 
 // Mock wallet class for testing
 class MockWallet extends WalletManager {
