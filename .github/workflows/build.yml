@@ -14,13 +14,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+        with:
+          fetch-depth: 0
       - name: Set up Node 22.19.0
         uses: actions/setup-node@v4
         with:
           node-version: "22.19.0"
           cache: "npm"
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
       - name: Install dependencies
-        run: npm clean-install
+        run: |
+          git config --global url."https://".insteadOf git://
+          git config --global url."https://".insteadOf ssh://
+          git config --global url."https://x-access-token:${{ secrets.PAT }}@github.com/".insteadOf git@github.com:
+          npm clean-install
       - name: Lint code with standard
         run: npm run lint
       - name: Run tests
