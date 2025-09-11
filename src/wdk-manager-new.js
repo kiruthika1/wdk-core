@@ -138,13 +138,6 @@ class WdkManager {
       throw new Error('WalletManager must extend WdkWallet')
     }
 
-    /**  Create a new wallet instance
-     * @type {WalletManager}
-     * @description The wallet instance.
-     * @example
-     * const wdk = new WdkManager('...')
-     * wdk.registerWallet('ethereum', WalletManagerEvm, ethereumWalletConfig)
-     */
     const walletInstance = new _WalletManager(this._seed, config)
 
     /** Store the wallet instance
