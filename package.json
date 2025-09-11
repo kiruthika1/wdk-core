@@ -21,7 +21,7 @@
     "docs": "jsdoc -r . --destination ./docs",
     "lint": "standard",
     "lint:fix": "standard --fix",
-    "test": "brittle test/**/*.js"
+    "test": "brittle tests/**/*.js"
   },
   "dependencies": {
     "@wdk/wallet": "https://github.com/tetherto/wdk-wallet#develop",
