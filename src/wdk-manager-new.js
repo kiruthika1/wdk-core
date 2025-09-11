@@ -55,10 +55,10 @@ class WdkManager {
     /** @private
      * @type {String | Uint8Array}
      * @description The wallet's BIP-39 seed phrase.
+     * @todo obfuscate the seed with cryptography
      * @example
      * const wdk = new WdkManager('...')
      * console.log(wdk._seed)
-     * TODO: offuscate the seed with cryptography
      */
     this._seed = seed
     /** @private
@@ -85,27 +85,18 @@ class WdkManager {
     return WdkWallet.getRandomSeedPhrase()
   }
 
-  /**
-   * Static Method to check if a seed phrase is valid.
+   /**
+   * Checks if a seed is valid.
    *
-   * @param {string} seed - The seed phrase.
-   * @returns {boolean} True if the seed phrase is valid.
+   * @param {string | Uint8Array} seed - The seed.
+   * @returns {boolean} True if the seed is valid.
    */
-  static isValidSeedPhrase (seed) {
-    console.log('seed inside isValidSeedPhrase', seed)
-    return WdkWallet.isValidSeedPhrase(seed) || this.isValidSeedBytes(seed)
-  }
-
-  /**
-   * Static Method to check if a seed bytes is valid.
-   *
-   * @param {Uint8Array} seedBytes - The seed bytes.
-   * @returns {boolean} True if the seed bytes is valid.
-   */
-  static isValidSeedBytes (seedBytes) {
-    return seedBytes instanceof Uint8Array &&
-         seedBytes.length >= 16 &&
-         seedBytes.length <= 32
+  static isValidSeed (seed) {
+    if (seed instanceof Uint8Array) {
+      return seed.length >= 16 && seed.length <= 64
+    }
+    
+    return WalletManager.isValidSeedPhrase(seed)
   }
 
   /**
