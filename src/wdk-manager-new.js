@@ -19,7 +19,7 @@ import WalletManager from '@wdk/wallet'
  */
 
 /**
- * @typedef {import("@wdk/wallet").WalletManager} WalletManager
+ * @typedef {import("@wdk/wallet").default} WalletManager
  */
 
 /**
