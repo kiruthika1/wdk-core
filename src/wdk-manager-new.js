@@ -15,13 +15,16 @@
 import WalletManager from '@wdk/wallet'
 
 /**
- *  @type {import('@wdk/wallet').default as WalletManager} WalletManager */
-
-/** @type {import("@wdk/wallet").IWalletAccount} */
+ * @typedef {import("@wdk/wallet").IWalletAccount | import("@wdk/wallet/protocols").ISwapProtocol | import("@wdk/wallet/protocols").IBridgeProtocol | import("@wdk/wallet/protocols").ILendingProtocol} IWalletAccountWithProtocols
+ */
 
 /**
- * @import {FeeRates} from "@wdk/wallet"
-*/
+ * @typedef {import("@wdk/wallet").WalletManager} WalletManager
+ */
+
+/**
+ * @typedef {import("@wdk/wallet").FeeRates} FeeRates
+ */
 
 /**
  * Wallet Development Kit Manager
@@ -70,7 +73,8 @@ class WdkManager {
      * @type {String | Uint8Array}
      */
     this._seed = seed
-    /** @private
+    /**
+     * @private
      * @type {Map<string, WalletManager>}
      * @description A map of registered wallet instances keyed by blockchain name.
      * @example
@@ -135,7 +139,7 @@ class WdkManager {
 
     // Check if WalletManager extends WalletManager
     if (!(_WalletManager.prototype instanceof WalletManager)) {
-      throw new Error('WalletManager must extend WdkWallet')
+      throw new Error('This object must extend WalletManager')
     }
 
     const walletInstance = new _WalletManager(this._seed, config)
@@ -156,7 +160,7 @@ class WdkManager {
    *
    * @param {string} blockchain - The name of the blockchain.
    * @param {number} [index] - The index of the account to get (default: 0).
-   * @returns {Promise<IWalletAccount>} The wallet account.
+   * @returns {Promise<IWalletAccountWithProtocols>} The wallet account.
    *
    * @throws {Error} If no wallet is registered for the specified blockchain.
    */
@@ -182,7 +186,7 @@ class WdkManager {
    *
    * @param {string} blockchain - The name of the blockchain.
    * @param {string} path - The path of the account to get.
-   * @returns {Promise<IWalletAccount>} The wallet account.
+   * @returns {Promise<IWalletAccountWithProtocols>} The wallet account.
    *
    * @throws {Error} If no wallet is registered for the specified blockchain.
    */
