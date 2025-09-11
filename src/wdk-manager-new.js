@@ -127,13 +127,9 @@ class WdkManager {
  * @throws {Error} If blockchain is not a string or wallet is not a class constructor.
  *
  * @example
- * import WdkManager from '@wdk/core'
  * import WalletManagerEvm from '@wdk/wallet-evm'
- * import WalletManagerSpark from '@wdk/wallet-spark'
  *
- * const wdk = new WdkManager('...')
  * wdk.registerWallet('ethereum', WalletManagerEvm, { rpcUrl: 'https://yourURL' })
- *    .registerWallet('spark', WalletManagerSpark, { network: 'REGTEST' })
  */
   registerWallet (blockchain, WalletClass, config) {
     if (typeof blockchain !== 'string') {
