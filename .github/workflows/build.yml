@@ -5,50 +5,21 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
-  workflow_dispatch:
-
-permissions:
-  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Configure GitHub PAT for all GH URLs
-        run: |
-          test -n "${{ secrets.PAT }}" || { echo "PAT secret missing in this fork"; exit 1; }
-          # git@github.com:org/repo.git
-          git config --global url."https://x-access-token:${{ secrets.PAT }}@github.com".insteadOf "git@github.com:"
-          git config --global url."https://x-access-token:${{ secrets.PAT }}@github.com/".insteadOf "git@github.com:"
-          # ssh://git@github.com/org/repo.git
-          git config --global url."https://x-access-token:${{ secrets.PAT }}@github.com".insteadOf "ssh://git@github.com"
-          git config --global url."https://x-access-token:${{ secrets.PAT }}@github.com/".insteadOf "ssh://git@github.com/"
-          # git://github.com/org/repo.git
-          git config --global url."https://x-access-token:${{ secrets.PAT }}@github.com".insteadOf "git://github.com"
-          git config --global url."https://x-access-token:${{ secrets.PAT }}@github.com/".insteadOf "git://github.com/"
-          # https://github.com/org/repo.git (private over https needs auth too)
-          git config --global url."https://x-access-token:${{ secrets.PAT }}@github.com".insteadOf "https://github.com"
-          git config --global url."https://x-access-token:${{ secrets.PAT }}@github.com/".insteadOf "https://github.com/"
-
-      - name: Preflight access to private dep
-        run: |
-          git ls-remote https://github.com/tetherto/wdk-wallet-tron-gasfree.git | head -n1
-
-      - name: Set up Node
+      - uses: actions/checkout@v3
+      - name: Set up Node 22.19.0
         uses: actions/setup-node@v4
         with:
           node-version: "22.19.0"
           cache: "npm"
-
       - name: Install dependencies
         run: npm clean-install
-
-      - name: Lint
+      - name: Lint code with standard
         run: npm run lint
-
-      - name: Test
+      - name: Run tests
         run: npm test
