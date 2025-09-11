@@ -90,13 +90,6 @@ class WdkManager {
    * @param {string} seed - The seed phrase.
    * @returns {boolean} True if the seed phrase is valid.
    */
-
-  /**
-   * Static Method to check if a seed phrase is valid.
-   *
-   * @param {string} seed - The seed phrase.
-   * @returns {boolean} True if the seed phrase is valid.
-   */
   static isValidSeedPhrase (seed) {
     console.log('seed inside isValidSeedPhrase', seed)
     return WdkWallet.isValidSeedPhrase(seed) || this.isValidSeedBytes(seed)
