@@ -16,14 +16,14 @@ import WdkWallet from '@wdk/wallet'
 /**
  * Wallet Development Kit Manager
  *
- * @description A flexible manager that can register and manage multiple wallet instances
+ * A flexible manager that can register and manage multiple wallet instances
  * for different blockchains dynamically.
  *
   * @example
  * import WdkManager from '@wdk/core'
  * import WalletManagerEvm from '@wdk/wallet-evm'
  *
- * const wdk = new WdkManager('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+ * const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
  * wdk.registerWallet('ethereum', WalletManagerEvm, { rpcUrl: 'https://yourURL' })
  * const account = await wdk.getAccount('ethereum', 0)
  * console.log(await account.getAddress())
@@ -114,7 +114,7 @@ class WdkManager {
          seedBytes.length <= 32
   }
 
-   /**
+  /**
    * Registers a new wallet to the wdk manager.
    *
    * @param {string} blockchain - The name of the blockchain the wallet must be bound to. Can be any string (e.g., "ethereum").
@@ -133,13 +133,13 @@ class WdkManager {
       throw new Error('Blockchain parameter must be a string')
     }
 
-    if (typeof WalletClass !== 'function') {
-      throw new Error('WalletClass parameter must be a class constructor')
+    if (typeof WalletManager !== 'function') {
+      throw new Error('WalletManager parameter must be a class constructor')
     }
 
-    // Check if WalletClass extends WdkWallet
-    if (!(WalletClass.prototype instanceof WdkWallet)) {
-      throw new Error('WalletClass must extend WdkWallet')
+    // Check if WalletManager extends WdkWallet
+    if (!(WalletManager.prototype instanceof WdkWallet)) {
+      throw new Error('WalletManager must extend WdkWallet')
     }
 
     /**  Create a new wallet instance
@@ -149,7 +149,7 @@ class WdkManager {
      * const wdk = new WdkManager('...')
      * wdk.registerWallet('ethereum', WalletManagerEvm, ethereumWalletConfig)
      */
-    const walletInstance = new WalletClass(this._seed, config)
+    const walletInstance = new WalletManager(this._seed, config)
 
     /** Store the wallet instance
      * @type {Map<string, WdkWallet>}
@@ -251,7 +251,7 @@ class WdkManager {
   async dispose () {
     for (const [, walletInstance] of this._wallets) {
       if (typeof walletInstance.dispose === 'function') {
-        await walletInstance.dispose()
+        walletInstance.dispose()
       }
     }
   }
