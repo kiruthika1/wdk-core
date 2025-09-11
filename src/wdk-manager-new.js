@@ -57,9 +57,6 @@ class WdkManager {
      * @type {String | Uint8Array}
      * @description The wallet's BIP-39 seed phrase.
      * @todo obfuscate the seed with cryptography
-     * @example
-     * const wdk = new WdkManager('...')
-     * console.log(wdk._seed)
      */
     this._seed = seed
     /** @private
