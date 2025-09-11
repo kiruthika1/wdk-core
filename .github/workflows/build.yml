@@ -13,24 +13,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v3
       - name: Set up Node 22.19.0
         uses: actions/setup-node@v4
         with:
           node-version: "22.19.0"
           cache: "npm"
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 10
-      - name: Install dependencies
+      - name: Configure Git to use PAT for GitHub
         run: |
-          git config --global url."https://".insteadOf git://
-          git config --global url."https://".insteadOf ssh://
-          git config --global url."https://x-access-token:${{ secrets.PAT }}@github.com/".insteadOf git@github.com:
-          npm clean-install
+          # cover 'git@github.com:org/repo.git'
+          git config --global url."https://x-access-token:${{ secrets.PAT }}@github.com/".insteadOf "git@github.com:"
+          # cover 'ssh://git@github.com/org/repo.git'
+          git config --global url."https://x-access-token:${{ secrets.PAT }}@github.com/".insteadOf "ssh://git@github.com/"
+          # cover 'git://github.com/org/repo.git'
+          git config --global url."https://x-access-token:${{ secrets.PAT }}@github.com/".insteadOf "git://github.com/"
+          # cover plain https (private repos over https need auth too)
+          git config --global url."https://x-access-token:${{ secrets.PAT }}@github.com/".insteadOf "https://github.com/"
+      - name: install packages
+        run: npm clean-install
       - name: Lint code with standard
         run: npm run lint
       - name: Run tests
