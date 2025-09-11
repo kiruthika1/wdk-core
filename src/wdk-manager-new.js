@@ -53,10 +53,11 @@ class WdkManager {
     }
 
     /**
+     * The wallet's bip-39 seed phrase.
+
+     * @todo Offuscate the seed with cryptography,
      * @private
-     * @type {string | Uint8Array}
-     * @description The wallet's BIP-39 seed phrase.
-     * @todo obfuscate the seed with cryptography
+     * @type {String | Uint8Array}
      */
     this._seed = seed
     /** @private

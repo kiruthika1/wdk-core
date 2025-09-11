@@ -66,13 +66,11 @@ declare class WdkManager {
    */
     constructor(seed: string | Uint8Array);
     /**
+     * The wallet's bip-39 seed phrase.
+
+     * @todo Offuscate the seed with cryptography,
      * @private
      * @type {String | Uint8Array}
-     * @description The wallet's BIP-39 seed phrase.
-     * @todo obfuscate the seed with cryptography
-     * @example
-     * const wdk = new WdkManager('...')
-     * console.log(wdk._seed)
      */
     private _seed;
     /** @private
