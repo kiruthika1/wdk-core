@@ -156,7 +156,7 @@ export default class WdkManager {
 
   /**
    * Returns the wallet abstracted account for a specific blockchain and index (see [BIP-44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki)).
-   * 
+   *
    * Note that the given blockchain must support account abstraction features for this method to work properly.
    *
    * @example
@@ -190,7 +190,7 @@ export default class WdkManager {
 
   /**
    * Returns the wallet abstracted account for a specific blockchain and BIP-44 derivation path.
-   * 
+   *
    * Note that the given blockchain must support account abstraction features for this method to work properly.
    *
    * @example
@@ -212,7 +212,7 @@ export default class WdkManager {
    * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
    * @returns {Promise<FeeRates>} The fee rates.
    */
-  async getFeeRates (blockchain) { 
+  async getFeeRates (blockchain) {
     const wallet = await this._getWalletManager(blockchain)
 
     return await wallet.getFeeRates()
@@ -352,38 +352,33 @@ export default class WdkManager {
     }
 
     if (!this._wallets[blockchain]) {
-      const seed = (typeof this._seed === 'string' || this._seed instanceof Uint8Array) 
-        ? this._seed 
+      const seed = (typeof this._seed === 'string' || this._seed instanceof Uint8Array)
+        ? this._seed
         : this._seed[blockchain]
-      
+
       const config = this._config
 
       if (EVM_BLOCKCHAINS.includes(blockchain)) {
         const { default: WalletManagerEvm } = await import('@wdk/wallet-evm')
 
         this._wallets[blockchain] = new WalletManagerEvm(seed, config[blockchain])
-      }
-      else if (blockchain === 'ton') {
+      } else if (blockchain === 'ton') {
         const { default: WalletManagerTon } = await import('@wdk/wallet-ton')
 
         this._wallets.ton = new WalletManagerTon(seed, config.ton)
-      }
-      else if (blockchain === 'tron') {
+      } else if (blockchain === 'tron') {
         const { default: WalletManagerTron } = await import('@wdk/wallet-tron')
 
         this._wallets.tron = new WalletManagerTron(seed, config.tron)
-      }
-      else if (blockchain === 'bitcoin') {
+      } else if (blockchain === 'bitcoin') {
         const { default: WalletManagerBtc } = await import('@wdk/wallet-btc')
 
         this._wallets.bitcoin = new WalletManagerBtc(seed, config.bitcoin)
-      }
-      else if (blockchain === 'spark') {
+      } else if (blockchain === 'spark') {
         const { default: WalletManagerSpark } = await import('@wdk/wallet-spark')
 
         this._wallets.spark = new WalletManagerSpark(seed, config.spark)
-      }
-      else if (blockchain === 'solana') {
+      } else if (blockchain === 'solana') {
         const { default: WalletManagerSolana } = await import('@wdk/wallet-solana')
 
         this._wallets.solana = new WalletManagerSolana(seed, config.solana)
@@ -400,25 +395,23 @@ export default class WdkManager {
     }
 
     if (!this._account_abstraction_wallets[blockchain]) {
-      const seed = (typeof this._seed === 'string' || this._seed instanceof Uint8Array) 
-        ? this._seed 
+      const seed = (typeof this._seed === 'string' || this._seed instanceof Uint8Array)
+        ? this._seed
         : this._seed[blockchain]
-      
+
       const config = this._config
 
       if (EVM_BLOCKCHAINS.includes(blockchain)) {
         const { default: WalletManagerEvmErc4337 } = await import('@wdk/wallet-evm-erc-4337')
 
         this._account_abstraction_wallets[blockchain] = new WalletManagerEvmErc4337(seed, config[blockchain])
-      }
-      else if (blockchain === 'ton') {
+      } else if (blockchain === 'ton') {
         const { default: WalletManagerTonGasless } = await import('@wdk/wallet-ton-gasless')
-        
+
         this._account_abstraction_wallets.ton = new WalletManagerTonGasless(seed, config.ton)
-      }
-      else if (blockchain === 'tron') {
+      } else if (blockchain === 'tron') {
         const { default: WalletManagerTronGasfree } = await import('@wdk/wallet-tron-gasfree')
-        
+
         this._account_abstraction_wallets.tron = new WalletManagerTronGasfree(seed, config.tron)
       }
     }
