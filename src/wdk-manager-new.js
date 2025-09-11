@@ -52,7 +52,8 @@ class WdkManager {
       throw new Error('Invalid seed phrase')
     }
 
-    /** @private
+    /** 
+     * @private
      * @type {String | Uint8Array}
      * @description The wallet's BIP-39 seed phrase.
      * @example
