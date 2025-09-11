@@ -16,7 +16,7 @@ import WdkWallet from '@wdk/wallet'
 /**
  * Wallet Development Kit Manager
  *
- * @description A flexible manager that can register and manage multiple wallet instances
+ * A flexible manager that can register and manage multiple wallet instances
  * for different blockchains dynamically.
  *
   * @example
