@@ -1,13 +1,8 @@
 export default WdkManager;
 export { WalletManager };
-export type WalletConstructorParameters<W extends typeof WalletManager> = ConstructorParameters<W>;
 /**
  *  @type {import('@wdk/wallet').default as WalletManager} WalletManager */
 /** @type {import("@wdk/wallet").IWalletAccount} */
-/**
- * @template {typeof WalletManager} W
- * @typedef {ConstructorParameters<W>} WalletConstructorParameters
- */
 /**
  * @import {FeeRates} from "@wdk/wallet"
 */
