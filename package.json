@@ -1,6 +1,17 @@
 {
   "name": "@wdk/core",
   "version": "1.0.0-beta.2",
+  "description": "A flexible manager that can register and manage multiple wallet instances for different blockchains dynamically.",
+  "keywords": [
+    "wdk",
+    "core"
+  ],
+  "author": "Tether",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/tetherto/wdk-core.git"
+  },
   "main": "index.js",
   "type": "module",
   "types": "./types",
@@ -30,16 +41,5 @@
     "jsdoc": "4.0.4",
     "standard": "17.1.2",
     "typescript": "5.8.3"
-  },
-  "description": "A flexible manager that can register and manage multiple wallet instances for different blockchains dynamically.",
-  "keywords": [
-    "wdk",
-    "core"
-  ],
-  "author": "Tether",
-  "license": "Apache-2.0",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/tetherto/wdk-core.git"
-  },
+  }
 }
