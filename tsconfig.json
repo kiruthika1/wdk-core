@@ -1,5 +1,5 @@
 {
-  "include": ["src/wdk-manager.js", "src/wdk-manager-new.js"],
+  "include": ["index.js", "src/**/*.js"],
   "compilerOptions": {
     "target": "ES2015",
     "module": "NodeNext",
@@ -7,10 +7,8 @@
     "allowJs": true,
     "declaration": true,
     "emitDeclarationOnly": true,
-    "noResolve": true,
     "skipLibCheck": true,
-    "typeRoots": ["./node_modules/@wdk"],
-    "outDir": "types",
-    "rootDir": "src"
+    "stripInternal": true,
+    "outDir": "./types"
   }
 }
