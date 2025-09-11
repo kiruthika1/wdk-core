@@ -68,7 +68,7 @@ class WdkManager {
      * wdk.registerWallet('ethereum', WalletManagerEvm, ethereumConfig)
      * // Now wdk._wallets.get('ethereum') returns a WalletManager instance
      */
-    this._wallets = Object.freeze(new Map())
+    this._wallets = new Map()
   }
 
   /**
