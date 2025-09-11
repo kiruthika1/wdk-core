@@ -114,28 +114,21 @@ class WdkManager {
          seedBytes.length <= 32
   }
 
-  /**
- * Registers a new wallet to the wdk manager.
- *
- * @description Registers a wallet class for a specific blockchain. The wallet's account will be instantiated
- * when first accessed via getAccount() or getAccountByPath(). This method supports method chaining.
- *
- * @param {string} blockchain - The name of the blockchain the wallet must be bound to (e.g., "ethereum", "spark").
- * @param {W} WdkWallet - The wallet manager class constructor that extends WdkWallet.
- * @param {ConstructorParameters<W>[1]} config - The configuration object passed to the wallet constructor.
- * @returns {WdkManager} Returns this instance for method chaining.
- * @throws {Error} If blockchain is not a string or wallet is not a class constructor.
- *
- * @example
- * import WdkManager from '@wdk/core'
- * import WalletManagerEvm from '@wdk/wallet-evm'
- * import WalletManagerSpark from '@wdk/wallet-spark'
- *
- * const wdk = new WdkManager('...')
- * wdk.registerWallet('ethereum', WalletManagerEvm, { rpcUrl: 'https://yourURL' })
- *    .registerWallet('spark', WalletManagerSpark, { network: 'REGTEST' })
- */
-  registerWallet (blockchain, WalletClass, config) {
+   /**
+   * Registers a new wallet to the wdk manager.
+   *
+   * @param {string} blockchain - The name of the blockchain the wallet must be bound to. Can be any string (e.g., "ethereum").
+   * @param {W} WalletManager - The wallet manager class.
+   * @param {ConstructorParameters<W>[1]} config - The configuration object.
+   * @template {typeof WalletManager} W
+   * @returns {WdkManager} The wdk manager.
+   *
+   * @example
+   * import WalletManagerEvm from '@wdk/wallet-evm'
+   *
+   * wdk.registerWallet('ethereum', WalletManagerEvm, { rpcUrl: 'https://your-provider-url.com' })
+   */
+  registerWallet (blockchain, WalletManager, config) {
     if (typeof blockchain !== 'string') {
       throw new Error('Blockchain parameter must be a string')
     }
