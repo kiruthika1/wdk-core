@@ -227,7 +227,7 @@ class WdkManager {
   /**
    * Disposes all wallet instances, erasing their private keys from memory.
    */
-  async dispose () {
+  dispose () {
     for (const [, walletInstance] of this._wallets) {
       walletInstance.dispose()
     }
