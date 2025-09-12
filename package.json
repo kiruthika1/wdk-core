@@ -16,8 +16,7 @@
   "type": "module",
   "types": "./types",
   "scripts": {
-    "build:types": "tsc --project tsconfig.json && npm run build:types:index",
-    "build:types:index": "tsc --project tsconfig.index.json",
+    "build:types": "tsc",
     "docs": "jsdoc -r . --destination ./docs",
     "lint": "standard",
     "lint:fix": "standard --fix",
