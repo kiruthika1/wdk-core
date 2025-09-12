@@ -12,14 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 'use strict'
-import IWalletManager from '@wdk/wallet'
+import WalletManager from '@wdk/wallet'
 
 /**
  * @typedef {import("@wdk/wallet").IWalletAccount | import("@wdk/wallet/protocols").ISwapProtocol | import("@wdk/wallet/protocols").IBridgeProtocol | import("@wdk/wallet/protocols").ILendingProtocol} IWalletAccountWithProtocols
- */
-
-/**
- * @typedef {import("@wdk/wallet").default} WalletManager
  */
 /**
  * @typedef {import("@wdk/wallet").FeeRates} FeeRates
@@ -80,7 +76,7 @@ class WdkManager {
     this._seed = seed
     /**
      * @private
-     * @type {Map<string, IWalletManager>}
+     * @type {Map<string, WalletManager>}
      * @description A map of registered wallet instances keyed by blockchain name.
      * @example
      * const wdk = new WdkManager('...')
@@ -100,7 +96,7 @@ class WdkManager {
    * console.log(seed)
    */
   static getRandomSeedPhrase () {
-    return IWalletManager.getRandomSeedPhrase()
+    return WalletManager.getRandomSeedPhrase()
   }
 
   /**
@@ -114,7 +110,7 @@ class WdkManager {
       return seed.length >= 16 && seed.length <= 64
     }
 
-    return IWalletManager.isValidSeedPhrase(seed)
+    return WalletManager.isValidSeedPhrase(seed)
   }
 
   /**
@@ -140,7 +136,7 @@ class WdkManager {
     }
 
     // Check if WalletManager extends WalletManager
-    if (!(_WalletManager.prototype instanceof IWalletManager)) {
+    if (!(_WalletManager.prototype instanceof WalletManager)) {
       throw new Error('This object must extend WalletManager')
     }
 

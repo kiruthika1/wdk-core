@@ -1,14 +1,10 @@
 export default WdkManager;
 export type IWalletAccountWithProtocols = import("@wdk/wallet").IWalletAccount | import("@wdk/wallet/protocols").ISwapProtocol | import("@wdk/wallet/protocols").IBridgeProtocol | import("@wdk/wallet/protocols").ILendingProtocol;
-export type WalletManager = import("@wdk/wallet").default;
 export type FeeRates = import("@wdk/wallet").FeeRates;
 export type WalletConfig = import("@wdk/wallet").WalletConfig;
 export type WalletManagerCtor = new (seed: string | Uint8Array, config?: WalletConfig) => WalletManager;
 /**
  * @typedef {import("@wdk/wallet").IWalletAccount | import("@wdk/wallet/protocols").ISwapProtocol | import("@wdk/wallet/protocols").IBridgeProtocol | import("@wdk/wallet/protocols").ILendingProtocol} IWalletAccountWithProtocols
- */
-/**
- * @typedef {import("@wdk/wallet").default} WalletManager
  */
 /**
  * @typedef {import("@wdk/wallet").FeeRates} FeeRates
@@ -81,7 +77,7 @@ declare class WdkManager {
     private _seed;
     /**
      * @private
-     * @type {Map<string, IWalletManager>}
+     * @type {Map<string, WalletManager>}
      * @description A map of registered wallet instances keyed by blockchain name.
      * @example
      * const wdk = new WdkManager('...')
@@ -141,3 +137,4 @@ declare class WdkManager {
      */
     dispose(): Promise<void>;
 }
+import WalletManager from '@wdk/wallet';
