@@ -13,6 +13,4 @@
 // limitations under the License.
 'use strict'
 
-/** @typedef {import('./src/wdk-manager.js').default} WdkManager */
-
 export { default } from './src/wdk-manager.js'
