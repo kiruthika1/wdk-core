@@ -128,19 +128,6 @@ class WdkManager {
    * wdk.registerWallet('ethereum', WalletManagerEvm, { rpcUrl: 'https://your-provider-url.com' })
    */
   registerWallet (blockchain, _WalletManager, config) {
-    if (typeof blockchain !== 'string') {
-      throw new Error('Blockchain parameter must be a string')
-    }
-
-    if (typeof _WalletManager !== 'function') {
-      throw new Error('WalletManager parameter must be a class constructor')
-    }
-
-    // Check if WalletManager extends WalletManager
-    if (!(_WalletManager.prototype instanceof WalletManager)) {
-      throw new Error('This object must extend WalletManager')
-    }
-
     const walletInstance = new _WalletManager(this._seed, config)
 
     /** Store the wallet instance
