@@ -15,7 +15,7 @@
 import IWalletManager from '@wdk/wallet'
 
 /**
- * @typedef {import("@wdk/wallet").IWalletAccount | import("@wdk/wallet/protocols").ISwapProtocol | import("@wdk/wallet/protocols").IBridgeProtocol | import("@wdk/wallet/protocols").ILendingProtocol} IWalletAccountWithProtocols
+ * @typedef {import("@wdk/wallet").IWalletAccount & import("@wdk/wallet/protocols").ISwapProtocol & import("@wdk/wallet/protocols").IBridgeProtocol & import("@wdk/wallet/protocols").ILendingProtocol} IWalletAccountWithProtocols
  */
 
 /**
