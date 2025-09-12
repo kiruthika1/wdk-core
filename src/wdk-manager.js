@@ -117,8 +117,9 @@ class WdkManager {
    * Registers a new wallet to the wdk manager.
    *
    * @param {string} blockchain - The name of the blockchain the wallet must be bound to. Can be any string (e.g., "ethereum").
-   * @param {WalletManagerCtor} _WalletManager - The wallet manager class (constructor).
-   * @param {WalletConfig} [config] - The configuration object.
+   * @param {W} WalletManager - The wallet manager class.
+   * @param {ConstructorParameters<W>[1]} config - The configuration object.
+   * @template {typeof WalletManager} W
    * @returns {WdkManager} The wdk manager.
    *
    * @example

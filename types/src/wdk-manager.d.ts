@@ -1,10 +1,10 @@
 export default WdkManager;
-export type IWalletAccountWithProtocols = import("@wdk/wallet").IWalletAccount | import("@wdk/wallet/protocols").ISwapProtocol | import("@wdk/wallet/protocols").IBridgeProtocol | import("@wdk/wallet/protocols").ILendingProtocol;
+export type IWalletAccountWithProtocols = import("@wdk/wallet").IWalletAccount & import("@wdk/wallet/protocols").ISwapProtocol & import("@wdk/wallet/protocols").IBridgeProtocol & import("@wdk/wallet/protocols").ILendingProtocol;
 export type FeeRates = import("@wdk/wallet").FeeRates;
 export type WalletConfig = import("@wdk/wallet").WalletConfig;
 export type WalletManagerCtor = new (seed: string | Uint8Array, config?: WalletConfig) => WalletManager;
 /**
- * @typedef {import("@wdk/wallet").IWalletAccount | import("@wdk/wallet/protocols").ISwapProtocol | import("@wdk/wallet/protocols").IBridgeProtocol | import("@wdk/wallet/protocols").ILendingProtocol} IWalletAccountWithProtocols
+ * @typedef {import("@wdk/wallet").IWalletAccount & import("@wdk/wallet/protocols").ISwapProtocol & import("@wdk/wallet/protocols").IBridgeProtocol & import("@wdk/wallet/protocols").ILendingProtocol} IWalletAccountWithProtocols
  */
 /**
  * @typedef {import("@wdk/wallet").FeeRates} FeeRates
@@ -89,8 +89,9 @@ declare class WdkManager {
      * Registers a new wallet to the wdk manager.
      *
      * @param {string} blockchain - The name of the blockchain the wallet must be bound to. Can be any string (e.g., "ethereum").
-     * @param {WalletManagerCtor} _WalletManager - The wallet manager class (constructor).
-     * @param {WalletConfig} [config] - The configuration object.
+     * @param {W} WalletManager - The wallet manager class.
+     * @param {ConstructorParameters<W>[1]} config - The configuration object.
+     * @template {typeof WalletManager} W
      * @returns {WdkManager} The wdk manager.
      *
      * @example
@@ -98,7 +99,7 @@ declare class WdkManager {
      *
      * wdk.registerWallet('ethereum', WalletManagerEvm, { rpcUrl: 'https://your-provider-url.com' })
      */
-    registerWallet(blockchain: string, _WalletManager: WalletManagerCtor, config?: WalletConfig): WdkManager;
+    registerWallet<W extends typeof WalletManager>(blockchain: string, _WalletManager: any, config: ConstructorParameters<W>[1]): WdkManager;
     /**
      * Get a wallet account for the specified blockchain.
      *
