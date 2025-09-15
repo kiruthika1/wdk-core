@@ -11,456 +11,284 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 'use strict'
 
-import AccountAbstractionManagerEvm from '@wdk/account-abstraction-evm'
+import WalletManager from '@wdk/wallet'
 
-import AccountAbstractionManagerTon from '@wdk/account-abstraction-ton'
+import { SwapProtocol, BridgeProtocol, LendingProtocol } from '@wdk/wallet/protocols'
 
-import * as bip39 from 'bip39'
+/** @typedef {import('@wdk/wallet').IWalletAccount} IWalletAccount */
 
-/** @typedef {import('@wdk/wallet-evm').EvmWalletConfig} EvmWalletConfig */
-/** @typedef {import('@wdk/account-abstraction-evm').EvmAccountAbstractionConfig} EvmAccountAbstractionConfig */
+/** @typedef {import('@wdk/wallet').FeeRates} FeeRates */
 
-/** @typedef {import('@wdk/wallet-ton').TonWalletConfig} TonWalletConfig */
-/** @typedef {import('@wdk/account-abstraction-ton').TonAccountAbstractionConfig} TonAccountAbstractionConfig */
+/** @typedef {import('./wallet-account-with-protocols.js').IWalletAccountWithProtocols} IWalletAccountWithProtocols */
 
-/** @typedef {import('@wdk/wallet-btc').BtcWalletConfig} BtcWalletConfig */
-
-/** @typedef {import('@wdk/wallet-spark').SparkWalletConfig} SparkWalletConfig */
-
-/** @typedef {import('./wallet-account.js').default} IWalletAccount */
-
-/**
- * @typedef {Object} Seeds
- * @property {string} ethereum - The ethereum's wallet seed phrase.
- * @property {string} arbitrum - The arbitrum's wallet seed phrase.
- * @property {string} polygon - The polygon's wallet seed phrase.
- * @property {string} ton - The ton's wallet seed phrase.
- * @property {string} bitcoin - The bitcoin's wallet seed phrase.
- * @property {string} spark - The spark's wallet seed phrase.
- */
-
-/**
- * @typedef {Object} WdkConfig
- * @property {EvmWalletConfig | EvmAccountAbstractionConfig} ethereum - The ethereum blockchain configuration.
- * @property {EvmWalletConfig | EvmAccountAbstractionConfig} arbitrum - The arbitrum blockchain configuration.
- * @property {EvmWalletConfig | EvmAccountAbstractionConfig} polygon - The polygon blockchain configuration.
- * @property {TonWalletConfig | TonAccountAbstractionConfig} ton - The ton blockchain configuration.
- * @property {BtcWalletConfig} bitcoin - The bitcoin blockchain configuration.
- * @property {SparkWalletConfig} spark - The spark blockchain configuration.
- */
-
-/**
- * @typedef {Object} TransferOptions
- * @property {string} recipient - The address of the recipient.
- * @property {string} token - The address of the token to transfer.
- * @property {number} amount - The amount of tokens to transfer to the recipient (in base unit).
- */
-
-/**
- * @typedef {Object} TransferConfig
- * @property {number} [transferMaxFee] - The maximum fee amount for transfer operations.
- * @property {Object} paymasterToken - The paymaster token configuration.
- * @property {string} paymasterToken.address - The address of the paymaster token.
- */
-
-/**
- * @typedef {Object} TransferResult
- * @property {string} hash - The hash of the transfer operation.
- * @property {number} gasCost - The gas cost in paymaster token.
- */
-
-/**
- * @typedef {Object} SwapOptions
- * @property {string} tokenIn - The address of the token to sell.
- * @property {string} tokenOut - The address of the token to buy.
- * @property {number} [tokenInAmount] - The amount of input tokens to sell (in base unit).
- * @property {number} [tokenOutAmount] - The amount of output tokens to buy (in base unit).
- */
-
-/**
- * @typedef {Object} SwapConfig
- * @property {number} [swapMaxFee] - The maximum fee amount for swap operations.
- * @property {Object} paymasterToken - The paymaster token configuration.
- * @property {string} paymasterToken.address - The address of the paymaster token.
- */
-
-/**
- * @typedef {Object} SwapResult
- * @property {string} hash - The hash of the swap operation.
- * @property {number} gasCost - The gas cost in paymaster token.
- * @property {number} tokenInAmount - The amount of input tokens sold.
- * @property {number} tokenOutAmount - The amount of output tokens bought.
- */
-
-/**
- * @typedef {Object} BridgeOptions
- * @property {string} targetChain - The identifier of the destination blockchain (e.g., "arbitrum").
- * @property {string} recipient - The address of the recipient.
- * @property {string} token - The address of the token to bridge.
- * @property {number} amount - The amount of usdt tokens to bridge to the destination chain (in base unit).
- */
-
-/**
- * @typedef {Object} BridgeConfig
- * @property {number} [bridgeMaxFee] - The maximum fee amount for bridge operations.
- * @property {Object} paymasterToken - The paymaster token configuration.
- * @property {string} paymasterToken.address - The address of the paymaster token.
- */
-
-/**
- * @typedef {Object} BridgeResult
- * @property {string} hash - The hash of the bridge operation.
- * @property {number} gasCost - The gas cost in paymaster token.
- * @property {number} bridgeCost - The bridge cost in usdt tokens.
- */
-
-/**
- * Enumeration for all available blockchains.
- *
- * @enum {string}
- */
-export const Blockchain = {
-  Ethereum: 'ethereum',
-  Arbitrum: 'arbitrum',
-  Polygon: 'polygon',
-  Ton: 'ton',
-  Bitcoin: 'bitcoin',
-  Spark: 'spark'
-}
-
-const EVM_BLOCKCHAINS = [
-  Blockchain.Ethereum,
-  Blockchain.Arbitrum,
-  Blockchain.Polygon
-]
-
-const ACCOUNT_ABSTRACTION_MANAGERS = {
-  ethereum: AccountAbstractionManagerEvm,
-  arbitrum: AccountAbstractionManagerEvm,
-  polygon: AccountAbstractionManagerEvm,
-  ton: AccountAbstractionManagerTon
-}
+/** @typedef {<A extends IWalletAccount>(account: A) => Promise<void>} MiddlewareFunction */
 
 export default class WdkManager {
-  #seed
-  #config
-  #wallets
-
-  #cache
-
   /**
    * Creates a new wallet development kit manager.
    *
-   * @param {string | Seeds} seed - A [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) seed phrase to use for
-   *                                all blockchains, or an object mapping each blockchain to a different seed phrase.
-   * @param {WdkConfig} config - The configuration for each blockchain.
+   * @param {string | Uint8Array} seed - The wallet's BIP-39 seed phrase.
+   * @throws {Error} If the seed is not valid.
    */
-  constructor (seed, config) {
-    this.#seed = seed
-    this.#config = config
-    this.#wallets = { }
+  constructor (seed) {
+    if (!WdkManager.isValidSeed(seed)) {
+      throw new Error('Invalid seed.')
+    }
 
-    this.#cache = { }
+    /** @private */
+    this._seed = seed
+
+    /** @private */
+    this._wallets = new Map()
+
+    /** @private */
+    this._protocols = { swap: { }, bridge: { }, lending: { } }
+
+    /** @private */
+    this._middlewares = { }
   }
 
   /**
-   * Returns a random [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) seed phrase.
+   * Returns a random BIP-39 seed phrase.
    *
    * @returns {string} The seed phrase.
-   *
-   * @example
-   * const seed = WdkManager.getRandomSeedPhrase();
-   *
-   * // Output: atom raven insect ...
-   * console.log(seed);
    */
   static getRandomSeedPhrase () {
-    return bip39.generateMnemonic()
+    return WalletManager.getRandomSeedPhrase()
   }
 
   /**
-   * Checks if a seed phrase is valid.
+   * Checks if a seed is valid.
    *
-   * @param {string} seed - The seed phrase.
-   * @returns {boolean} True if the seed phrase is valid.
+   * @param {string | Uint8Array} seed - The seed.
+   * @returns {boolean} True if the seed is valid.
    */
-  static isValidSeedPhrase (seed) {
-    return bip39.validateMnemonic(seed)
+  static isValidSeed (seed) {
+    if (seed instanceof Uint8Array) {
+      return seed.length >= 16 && seed.length <= 64
+    }
+
+    return WalletManager.isValidSeedPhrase(seed)
   }
 
   /**
-   * Returns the wallet account for a specific blockchain and index (see [BIP-44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki)).
+   * Registers a new wallet to the wdk manager.
    *
-   * @example
-   * // Return the account for the ethereum blockchain with derivation path m/44'/60'/0'/0/1
-   * const account = await wdk.getAccount("ethereum", 1);
-   * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
-   * @param {number} [index] - The index of the account to get (default: 0).
-   * @returns {Promise<IWalletAccount>} The account.
-  */
-  async getAccount (blockchain, index = 0) {
-    const wallet = await this.#getWalletManager(blockchain)
+   * @template {typeof WalletManager} W
+   * @param {string} blockchain - The name of the blockchain the wallet must be bound to. Can be any string (e.g., "ethereum").
+   * @param {W} WalletManager - The wallet manager class.
+   * @param {ConstructorParameters<W>[1]} config - The configuration object.
+   * @returns {WdkManager} The wdk manager.
+   */
+  registerWallet (blockchain, WalletManager, config) {
+    const wallet = new WalletManager(this._seed, config)
 
-    return await wallet.getAccount(index)
+    this._wallets.set(blockchain, wallet)
+
+    return this
+  }
+
+  /**
+   * Registers a new protocol to the wdk manager.
+   *
+   * The label must be unique in the scope of the blockchain and the type of protocol (i.e., there can't be two protocols of the
+   * same type bound to the same blockchain with the same label).
+   *
+   * @see {@link IWalletAccountWithProtocols#registerProtocol} to register protocols only for specific accounts.
+   * @template {typeof SwapProtocol | typeof BridgeProtocol | typeof LendingProtocol} P
+   * @param {string} blockchain - The name of the blockchain the protocol must be bound to. Can be any string (e.g., "ethereum").
+   * @param {string} label - The label.
+   * @param {P} Protocol - The protocol class.
+   * @param {ConstructorParameters<P>[1]} config - The protocol configuration.
+   * @returns {WdkManager} The wdk manager.
+   */
+  registerProtocol (blockchain, label, Protocol, config) {
+    if (Protocol.prototype instanceof SwapProtocol) {
+      this._protocols.swap[blockchain] ??= { }
+
+      this._protocols.swap[blockchain][label] = { Protocol, config }
+    } else if (Protocol.prototype instanceof BridgeProtocol) {
+      this._protocols.bridge[blockchain] ??= { }
+
+      this._protocols.bridge[blockchain][label] = { Protocol, config }
+    } else if (Protocol.prototype instanceof LendingProtocol) {
+      this._protocols.lending[blockchain] ??= { }
+
+      this._protocols.lending[blockchain][label] = { Protocol, config }
+    }
+
+    return this
+  }
+
+  /**
+   * Registers a new middleware to the wdk manager.
+   *
+   * It's possible to register multiple middlewares for the same blockchain, which will be called sequentially.
+   *
+   * @param {string} blockchain - The name of the blockchain the middleware must be bound to. Can be any string (e.g., "ethereum").
+   * @param {MiddlewareFunction} middleware - A callback function that is called each time the user derives a new account.
+   * @returns {WdkManager} The wdk manager.
+   */
+  registerMiddleware (blockchain, middleware) {
+    this._middlewares[blockchain] ??= []
+
+    this._middlewares[blockchain].push(middleware)
+
+    return this
+  }
+
+  /**
+   * Returns the wallet account for a specific blockchain and index (see BIP-44).
+   *
+   * @param {string} blockchain - The name of the blockchain (e.g., "ethereum").
+   * @param {number} [index] - The index of the account to get (default: 0).
+   * @returns {Promise<IWalletAccountWithProtocols>} The account.
+   * @throws {Error} If no wallet has been registered for the given blockchain.
+   */
+  async getAccount (blockchain, index = 0) {
+    if (!this._wallets.has(blockchain)) {
+      throw new Error(`No wallet registered for blockchain: ${blockchain}.`)
+    }
+
+    const wallet = this._wallets.get(blockchain)
+
+    const account = await wallet.getAccount(index)
+
+    await this._runMiddlewares(account, { blockchain })
+
+    this._registerProtocols(account, { blockchain })
+
+    return account
   }
 
   /**
    * Returns the wallet account for a specific blockchain and BIP-44 derivation path.
    *
-   * @example
-   * // Returns the account for the ethereum blockchain with derivation path m/44'/60'/0'/0/1
-   * const account = await wdk.getAccountByPath("ethereum", "0'/0/1");
-   * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
-   * @param {string} path - The derivation path (e.g. "0'/0/0").
-   * @returns {Promise<IWalletAccount>} The account.
+   * @param {string} blockchain - The name of the blockchain (e.g., "ethereum").
+   * @param {string} path - The derivation path (e.g., "0'/0/0").
+   * @returns {Promise<IWalletAccountWithProtocols>} The account.
+   * @throws {Error} If no wallet has been registered for the given blockchain.
    */
   async getAccountByPath (blockchain, path) {
-    const wallet = await this.#getWalletManager(blockchain)
+    if (!this._wallets.has(blockchain)) {
+      throw new Error(`No wallet registered for blockchain: ${blockchain}.`)
+    }
 
-    return await wallet.getAccountByPath(path)
+    const wallet = this._wallets.get(blockchain)
+
+    const account = await wallet.getAccountByPath(path)
+
+    await this._runMiddlewares(account, { blockchain })
+
+    this._registerProtocols(account, { blockchain })
+
+    return account
   }
 
   /**
    * Returns the current fee rates for a specific blockchain.
    *
-   * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
-   * @returns {Promise<{ normal: number, fast: number }>} The fee rates (in weis).
+   * @param {string} blockchain - The name of the blockchain (e.g., "ethereum").
+   * @returns {Promise<FeeRates>} The fee rates (in base unit).
+   * @throws {Error} If no wallet has been registered for the given blockchain.
    */
-  async getFeeRates (blockchain) { 
-    const wallet = await this.#getWalletManager(blockchain)
-
-    return await wallet.getFeeRates()
-  }
-
-  /**
-   * Returns the abstracted address of an account.
-   *
-   * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
-   * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
-   * @returns {Promise<string>} The abstracted address.
-   *
-   * @example
-   * // Get the abstracted address of the ethereum wallet's account at m/44'/60'/0'/0/3
-   * const abstractedAddress = await wdk.getAbstractedAddress("ethereum", 3);
-   */
-  async getAbstractedAddress (blockchain, accountIndex) {
-    const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
-
-    return await manager.getAbstractedAddress()
-  }
-
-  /**
-   * Returns the native token balance of an abstracted address.
-   *
-   * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
-   * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
-   * @returns {Promise<number>} The native token balance (in base unit).
-   */
-  async getAbstractedAddressBalance (blockchain, accountIndex) {
-    const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
-
-    return await manager.getAbstractedAddressBalance()
-  }
-
-  /**
-   * Returns the balance of an abstracted address for a specific token.
-   *
-   * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
-   * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
-   * @param {string} tokenAddress - The smart contract address of the token
-   * @returns {Promise<number>} The token balance (in base unit).
-   */
-  async getAbstractedAddressTokenBalance (blockchain, accountIndex, tokenAddress) {
-    const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
-
-    return await manager.getAbstractedAddressTokenBalance(tokenAddress)
-  }
-
-  /**
-   * Returns the paymaster token balance of an abstracted address.
-   *
-   * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
-   * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
-   * @returns {Promise<number>} The paymaster token balance (in base unit).
-   */
-  async getAbstractedAddressPaymasterTokenBalance (blockchain, accountIndex) {
-    const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
-
-    return await manager.getAbstractedAddressPaymasterTokenBalance()
-  }
-
-  /**
-   * Transfers a token to another address.
-   *
-   * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
-   * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
-   * @param {TransferOptions} options - The transfer's options.
-   * @param {TransferConfig} [config] - If set, overrides the 'transferMaxFee' and 'paymasterToken' options defined in the manager configuration.
-   * @returns {Promise<TransferResult>} The transfer's result.
-   *
-   * @example
-   * // Transfer 1.0 USDT from the ethereum wallet's account at index 0 to another address
-   * const transfer = await wdk.transfer("ethereum", 0, {
-   *     recipient: "0xabc...",
-   *     token: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-   *     amount: 1_000_000
-   * });
-   *
-   * console.log("Transaction hash:", transfer.hash);
-   */
-  async transfer (blockchain, accountIndex, options, config) {
-    const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
-
-    return await manager.transfer(options, config)
-  }
-
-  /**
-   * Quotes the costs of a transfer operation.
-   *
-   * @see {@link transfer}
-   * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
-   * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
-   * @param {TransferOptions} options - The transfer's options.
-   * @param {TransferConfig} [config] - If set, overrides the 'transferMaxFee' and 'paymasterToken' options defined in the manager configuration.
-   * @returns {Promise<Omit<TransferResult, 'hash'>>} The transfer's quotes.
-   *
-   * @example
-   * // Quote the transfer of 1.0 USDT from the ethereum wallet's account at index 0 to another address
-   * const quote = await wdk.quoteTransfer("ethereum", 0, {
-   *     recipient: "0xabc...",
-   *     token: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-   *     amount: 1_000_000
-   * });
-   *
-   * console.log("Gas cost in paymaster token:", quote.gasCost);
-   */
-  async quoteTransfer (blockchain, accountIndex, options, config) {
-    const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
-
-    return await manager.quoteTransfer(options, config)
-  }
-
-  /**
-   * Swaps a pair of tokens.
-   *
-   * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
-   * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
-   * @param {SwapOptions} options - The swap's options.
-   * @param {SwapConfig} [config] - If set, overrides the 'swapMaxFee' and 'paymasterToken' options defined in the manager configuration.
-   * @returns {Promise<SwapResult>} The swap's result.
-   */
-  async swap (blockchain, accountIndex, options, config) {
-    const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
-
-    return await manager.swap(options, config)
-  }
-
-  /**
-   * Quotes the costs of a swap operation.
-   *
-   * @see {@link swap}
-   * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
-   * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
-   * @param {SwapOptions} options - The swap's options.
-   * @param {SwapConfig} [config] - If set, overrides the 'swapMaxFee' and 'paymasterToken' options defined in the manager configuration.
-   * @returns {Promise<Omit<SwapResult, 'hash'>>} The swap's quotes.
-   */
-  async quoteSwap (blockchain, accountIndex, options, config) {
-    const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
-
-    return await manager.quoteSwap(options, config)
-  }
-
-  /**
-   * Bridges usdt tokens to a different blockchain.
-   *
-   * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
-   * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
-   * @param {BridgeOptions} options - The bridge's options.
-   * @param {BridgeConfig} [config] - If set, overrides the 'bridgeMaxFee' and 'paymasterToken' options defined in the manager configuration.
-   * @returns {Promise<BridgeResult>} The bridge's result.
-   */
-  async bridge (blockchain, accountIndex, options, config) {
-    const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
-
-    return await manager.bridge(options, config)
-  }
-
-  /**
-   * Quotes the costs of a bridge operation.
-   *
-   * @see {@link bridge}
-   * @param {Blockchain} blockchain - A blockchain identifier (e.g., "ethereum").
-   * @param {number} accountIndex - The index of the account to use (see [BIP-44](https://en.bitcoin.it/wiki/BIP_0044)).
-   * @param {BridgeOptions} options - The bridge's options.
-   * @param {BridgeConfig} [config] - If set, overrides the 'bridgeMaxFee' and 'paymasterToken' options defined in the manager configuration.
-   * @returns {Promise<Omit<BridgeResult, 'hash'>>} The bridge's quotes.
-   */
-  async quoteBridge (blockchain, accountIndex, options, config) {
-    const manager = await this.#getAccountAbstractionManager(blockchain, accountIndex)
-
-    return await manager.quoteBridge(options, config)
-  }
-
-  async #getWalletManager (blockchain) {
-    if (!Object.values(Blockchain).includes(blockchain)) {
-      throw new Error(`Unsupported blockchain: ${blockchain}.`)
+  async getFeeRates (blockchain) {
+    if (!this._wallets.has(blockchain)) {
+      throw new Error(`No wallet registered for blockchain: ${blockchain}.`)
     }
 
-    if (!this.#wallets[blockchain]) {
-      const seed = this.#seed,
-            config = this.#config
+    const wallet = this._wallets.get(blockchain)
 
-      const seedPhrase = typeof seed === 'string' ? seed : seed[blockchain]
+    const feeRates = await wallet.getFeeRates()
 
-      if (EVM_BLOCKCHAINS.includes(blockchain)) {
-        const { default: WalletManagerEvm } = await import('@wdk/wallet-evm')
-
-        this.#wallets[blockchain] = new WalletManagerEvm(seedPhrase, config[blockchain])
-      }
-      else if (blockchain === 'ton') {
-        const { default: WalletManagerTon } = await import('@wdk/wallet-ton')
-
-        this.#wallets.ton = new WalletManagerTon(seedPhrase, config.ton)
-      }
-      else if (blockchain === 'bitcoin') {
-        const { default: WalletManagerBtc } = await import('@wdk/wallet-btc')
-
-        this.#wallets.bitcoin = new WalletManagerBtc(seedPhrase, config.bitcoin)
-      }
-      else if (blockchain === 'spark') {
-        const { default: WalletManagerSpark } = await import('@wdk/wallet-spark')
-
-        this.#wallets.spark = new WalletManagerSpark(seedPhrase, config.spark)
-      }
-    }
-
-    return this.#wallets[blockchain]
+    return feeRates
   }
 
-  async #getAccountAbstractionManager (blockchain, accountIndex) {
-    if (!ACCOUNT_ABSTRACTION_MANAGERS[blockchain]) {
-      throw new Error(`Account abstraction unsupported for blockchain: ${blockchain}.`)
+  /**
+   * Disposes and unregisters all the wallets, erasing any sensitive data from the memory.
+   */
+  dispose () {
+    for (const [, wallet] of this._wallets) {
+      wallet.dispose()
     }
 
-    if (!this.#cache[[blockchain, accountIndex]]) {
-      const account = await this.getAccount(blockchain, accountIndex)
-      
-      const config = this.#config[blockchain]
+    this._wallets.clear()
+  }
 
-      const manager = new ACCOUNT_ABSTRACTION_MANAGERS[blockchain](
-        {
-          address: await account.getAddress(),
-          keyPair: account.keyPair
-        }, 
-        config
-      )
+  /** @private */
+  async _runMiddlewares (account, { blockchain }) {
+    if (this._middlewares[blockchain]) {
+      for (const middleware of this._middlewares[blockchain]) {
+        await middleware(account)
+      }
+    }
+  }
 
-      this.#cache[[blockchain, accountIndex]] = manager
+  /** @private */
+  _registerProtocols (account, { blockchain }) {
+    const protocols = { swap: { }, bridge: { }, lending: { } }
+
+    account.registerProtocol = (label, Protocol, config) => {
+      if (Protocol.prototype instanceof SwapProtocol) {
+        protocols.swap[label] = new Protocol(account, config)
+      } else if (Protocol.prototype instanceof BridgeProtocol) {
+        protocols.bridge[label] = new Protocol(account, config)
+      } else if (Protocol.prototype instanceof LendingProtocol) {
+        protocols.lending[label] = new Protocol(account, config)
+      }
+
+      return account
     }
 
-    return this.#cache[[blockchain, accountIndex]]
+    account.getSwapProtocol = (label) => {
+      if (this._protocols.swap[blockchain]?.[label]) {
+        const { Protocol, config } = this._protocols.swap[blockchain][label]
+
+        const protocol = new Protocol(account, config)
+
+        return protocol
+      }
+
+      if (protocols.swap[label]) {
+        return protocols.swap[label]
+      }
+
+      throw new Error(`No swap protocol registered for label: ${label}.`)
+    }
+
+    account.getBridgeProtocol = (label) => {
+      if (this._protocols.bridge[blockchain]?.[label]) {
+        const { Protocol, config } = this._protocols.bridge[blockchain][label]
+
+        const protocol = new Protocol(account, config)
+
+        return protocol
+      }
+
+      if (protocols.bridge[label]) {
+        return protocols.bridge[label]
+      }
+
+      throw new Error(`No bridge protocol registered for label: ${label}.`)
+    }
+
+    account.getLendingProtocol = (label) => {
+      if (this._protocols.lending[blockchain]?.[label]) {
+        const { Protocol, config } = this._protocols.lending[blockchain][label]
+
+        const protocol = new Protocol(account, config)
+
+        return protocol
+      }
+
+      if (protocols.lending[label]) {
+        return protocols.lending[label]
+      }
+
+      throw new Error(`No lending protocol registered for label: ${label}.`)
+    }
   }
 }
