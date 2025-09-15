@@ -11,89 +11,50 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 'use strict'
+
 import WalletManager from '@wdk/wallet'
 
-/**
- * @typedef {import("@wdk/wallet").IWalletAccount & import("@wdk/wallet/protocols").ISwapProtocol & import("@wdk/wallet/protocols").IBridgeProtocol & import("@wdk/wallet/protocols").ILendingProtocol} IWalletAccountWithProtocols
- */
-/**
- * @typedef {import("@wdk/wallet").FeeRates} FeeRates
- */
-/**
- * @typedef {import("@wdk/wallet").WalletConfig} WalletConfig
- */
-/**
- * @typedef {new (seed: string | Uint8Array, config?: WalletConfig) => WalletManager} WalletManagerCtor
- */
+import { SwapProtocol, BridgeProtocol, LendingProtocol } from '@wdk/wallet/protocols'
 
-/**
- * Wallet Development Kit Manager
- *
- * A flexible manager that can register and manage multiple wallet instances
- * for different blockchains dynamically.
- *
-  * @example
- * import WdkManager from '@wdk/core'
- * import WalletManagerEvm from '@wdk/wallet-evm'
- *
- * const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
- * wdk.registerWallet('ethereum', WalletManagerEvm, { rpcUrl: 'https://yourURL' })
- * const account = await wdk.getAccount('ethereum', 0)
- * // Output: "Account m/44'/60'/0'/0/0: 0x123..."
- * console.log("Account m/44'/60'/0'/0/0:", await account.getAddress())
- */
-class WdkManager {
+/** @typedef {import('@wdk/wallet').IWalletAccount} IWalletAccount */
+
+/** @typedef {import('@wdk/wallet').FeeRates} FeeRates */
+
+/** @typedef {import('./wallet-account-with-protocols.js').IWalletAccountWithProtocols} IWalletAccountWithProtocols */
+
+/** @typedef {<A extends IWalletAccount>(account: A) => Promise<void>} MiddlewareFunction */
+
+export default class WdkManager {
   /**
- * Creates a new wallet development kit manager.
- *
- * @description Initializes a new WdkManager instance with a BIP-39 seed phrase that will be used
- * to derive wallet accounts across all registered blockchains.
- *
- * @param {string | Uint8Array} seed - The wallet's BIP-39 seed phrase used for deriving all wallet accounts.
- * @throws {Error} If the seed parameter is invalid or missing.
- *
- * @example
- * // Using string mnemonic
- * const wdk = new WdkManager('test only example nut use this real life secret phrase must random')
- *
- * // Using Uint8Array
- * const seedBytes = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
- * const wdk = new WdkManager(seedBytes)
- */
+   * Creates a new wallet development kit manager.
+   *
+   * @param {string | Uint8Array} seed - The wallet's BIP-39 seed phrase.
+   * @throws {Error} If the seed is not valid.
+   */
   constructor (seed) {
     if (!WdkManager.isValidSeed(seed)) {
-      throw new Error('Invalid seed phrase')
+      throw new Error('Invalid seed.')
     }
 
-    /**
-     * The wallet's bip-39 seed phrase.
-
-     * @todo Offuscate the seed with cryptography,
-     * @private
-     * @type {String | Uint8Array}
-     */
+    /** @private */
     this._seed = seed
-    /**
-     * @private
-     * @type {Map<string, WalletManager>}
-     * @description A map of registered wallet instances keyed by blockchain name.
-     * @example
-     * const wdk = new WdkManager('...')
-     * wdk.registerWallet('ethereum', WalletManagerEvm, ethereumConfig)
-     * // Now wdk._wallets.get('ethereum') returns a WalletManager instance
-     */
+
+    /** @private */
     this._wallets = new Map()
+
+    /** @private */
+    this._protocols = { swap: { }, bridge: { }, lending: { } }
+
+    /** @private */
+    this._middlewares = { }
   }
 
   /**
-   * Returns a random [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) seed phrase.
+   * Returns a random BIP-39 seed phrase.
    *
    * @returns {string} The seed phrase.
-   *
-   * @example
-   * const seed = WdkManager.getRandomSeedPhrase()
-   * console.log(seed)
    */
   static getRandomSeedPhrase () {
     return WalletManager.getRandomSeedPhrase()
@@ -116,122 +77,218 @@ class WdkManager {
   /**
    * Registers a new wallet to the wdk manager.
    *
+   * @template {typeof WalletManager} W
    * @param {string} blockchain - The name of the blockchain the wallet must be bound to. Can be any string (e.g., "ethereum").
    * @param {W} WalletManager - The wallet manager class.
    * @param {ConstructorParameters<W>[1]} config - The configuration object.
-   * @template {typeof WalletManager} W
    * @returns {WdkManager} The wdk manager.
-   *
-   * @example
-   * import WalletManagerEvm from '@wdk/wallet-evm'
-   *
-   * wdk.registerWallet('ethereum', WalletManagerEvm, { rpcUrl: 'https://your-provider-url.com' })
    */
-  registerWallet (blockchain, _WalletManager, config) {
-    const walletInstance = new _WalletManager(this._seed, config)
+  registerWallet (blockchain, WalletManager, config) {
+    const wallet = new WalletManager(this._seed, config)
 
-    /** Store the wallet instance
-     * @type {Map<string, WalletManager>}
-     * @description The wallet instance.
-     * @example
-     * const wdk = new WdkManager('...')
-     * wdk.registerWallet('ethereum', WalletManagerEvm, ethereumWalletConfig)
-     */
-    this._wallets.set(blockchain, walletInstance)
+    this._wallets.set(blockchain, wallet)
+
     return this
   }
 
   /**
-   * Get a wallet account for the specified blockchain.
+   * Registers a new protocol to the wdk manager.
    *
-   * @param {string} blockchain - The name of the blockchain.
+   * The label must be unique in the scope of the blockchain and the type of protocol (i.e., there can't be two protocols of the
+   * same type bound to the same blockchain with the same label).
+   *
+   * @see {@link IWalletAccountWithProtocols#registerProtocol} to register protocols only for specific accounts.
+   * @template {typeof SwapProtocol | typeof BridgeProtocol | typeof LendingProtocol} P
+   * @param {string} blockchain - The name of the blockchain the protocol must be bound to. Can be any string (e.g., "ethereum").
+   * @param {string} label - The label.
+   * @param {P} Protocol - The protocol class.
+   * @param {ConstructorParameters<P>[1]} config - The protocol configuration.
+   * @returns {WdkManager} The wdk manager.
+   */
+  registerProtocol (blockchain, label, Protocol, config) {
+    if (Protocol.prototype instanceof SwapProtocol) {
+      this._protocols.swap[blockchain] ??= { }
+
+      this._protocols.swap[blockchain][label] = { Protocol, config }
+    } else if (Protocol.prototype instanceof BridgeProtocol) {
+      this._protocols.bridge[blockchain] ??= { }
+
+      this._protocols.bridge[blockchain][label] = { Protocol, config }
+    } else if (Protocol.prototype instanceof LendingProtocol) {
+      this._protocols.lending[blockchain] ??= { }
+
+      this._protocols.lending[blockchain][label] = { Protocol, config }
+    }
+
+    return this
+  }
+
+  /**
+   * Registers a new middleware to the wdk manager.
+   *
+   * It's possible to register multiple middlewares for the same blockchain, which will be called sequentially.
+   *
+   * @param {string} blockchain - The name of the blockchain the middleware must be bound to. Can be any string (e.g., "ethereum").
+   * @param {MiddlewareFunction} middleware - A callback function that is called each time the user derives a new account.
+   * @returns {WdkManager} The wdk manager.
+   */
+  registerMiddleware (blockchain, middleware) {
+    this._middlewares[blockchain] ??= []
+
+    this._middlewares[blockchain].push(middleware)
+
+    return this
+  }
+
+  /**
+   * Returns the wallet account for a specific blockchain and index (see BIP-44).
+   *
+   * @param {string} blockchain - The name of the blockchain (e.g., "ethereum").
    * @param {number} [index] - The index of the account to get (default: 0).
-   * @returns {Promise<IWalletAccountWithProtocols>} The wallet account.
-   *
-   * @throws {Error} If no wallet is registered for the specified blockchain.
+   * @returns {Promise<IWalletAccountWithProtocols>} The account.
+   * @throws {Error} If no wallet has been registered for the given blockchain.
    */
   async getAccount (blockchain, index = 0) {
     if (!this._wallets.has(blockchain)) {
-      throw new Error(`No wallet registered for blockchain: ${blockchain}`)
+      throw new Error(`No wallet registered for blockchain: ${blockchain}.`)
     }
 
-    /** Get the wallet instance
-     * @type {WalletManager}
-     * @description The wallet instance.
-     * @example
-     * const wdk = new WdkManager('...')
-     * wdk.registerWallet('ethereum', WalletManagerEvm, ethereumWalletConfig)
-     */
     const wallet = this._wallets.get(blockchain)
 
-    return await wallet.getAccount(index)
+    const account = await wallet.getAccount(index)
+
+    await this._runMiddlewares(account, { blockchain })
+
+    this._registerProtocols(account, { blockchain })
+
+    return account
   }
 
   /**
-   * Get a wallet account for the specified blockchain by path.
+   * Returns the wallet account for a specific blockchain and BIP-44 derivation path.
    *
-   * @param {string} blockchain - The name of the blockchain.
-   * @param {string} path - The path of the account to get.
-   * @returns {Promise<IWalletAccountWithProtocols>} The wallet account.
-   *
-   * @throws {Error} If no wallet is registered for the specified blockchain.
+   * @param {string} blockchain - The name of the blockchain (e.g., "ethereum").
+   * @param {string} path - The derivation path (e.g., "0'/0/0").
+   * @returns {Promise<IWalletAccountWithProtocols>} The account.
+   * @throws {Error} If no wallet has been registered for the given blockchain.
    */
   async getAccountByPath (blockchain, path) {
     if (!this._wallets.has(blockchain)) {
-      throw new Error(`No wallet registered for blockchain: ${blockchain}`)
+      throw new Error(`No wallet registered for blockchain: ${blockchain}.`)
     }
 
-    /** Get the wallet instance
-     * @type {WalletManager}
-     * @description The wallet instance.
-     * @example
-     * const wdk = new WdkManager('...')
-     * wdk.registerWallet('ethereum', WalletManagerEvm, ethereumWalletConfig)
-     */
     const wallet = this._wallets.get(blockchain)
 
-    return await wallet.getAccountByPath(path)
+    const account = await wallet.getAccountByPath(path)
+
+    await this._runMiddlewares(account, { blockchain })
+
+    this._registerProtocols(account, { blockchain })
+
+    return account
   }
 
   /**
-   * Get the wallet FeeRates for the specified blockchain.
+   * Returns the current fee rates for a specific blockchain.
    *
-   * @param {string} blockchain - The name of the blockchain.
-   * @returns {Promise<FeeRates>} The fee rates.
-   */
-  /**
-   * Get the wallet FeeRates for the specified blockchain.
-   *
-   * @param {string} blockchain - The name of the blockchain.
-   * @returns {Promise<FeeRates>} The fee rates.
+   * @param {string} blockchain - The name of the blockchain (e.g., "ethereum").
+   * @returns {Promise<FeeRates>} The fee rates (in base unit).
+   * @throws {Error} If no wallet has been registered for the given blockchain.
    */
   async getFeeRates (blockchain) {
     if (!this._wallets.has(blockchain)) {
-      throw new Error(`No wallet registered for blockchain: ${blockchain}`)
+      throw new Error(`No wallet registered for blockchain: ${blockchain}.`)
     }
 
-    /** Get the wallet instance
-     * @type {WalletManager}
-     * @description The wallet instance.
-     * @example
-     * const wdk = new WdkManager('...')
-     * wdk.registerWallet('ethereum', WalletManagerEvm, ethereumWalletConfig)
-     * const feeRates = await wdk.getFeeRates('ethereum')
-     * console.log(feeRates)
-     */
     const wallet = this._wallets.get(blockchain)
 
-    return await wallet.getFeeRates()
+    const feeRates = await wallet.getFeeRates()
+
+    return feeRates
   }
 
   /**
-   * Disposes all wallet instances, erasing their private keys from memory.
+   * Disposes and unregisters all the wallets, erasing any sensitive data from the memory.
    */
   dispose () {
-    for (const [, walletInstance] of this._wallets) {
-      walletInstance.dispose()
+    for (const [, wallet] of this._wallets) {
+      wallet.dispose()
+    }
+
+    this._wallets.clear()
+  }
+
+  /** @private */
+  async _runMiddlewares (account, { blockchain }) {
+    if (this._middlewares[blockchain]) {
+      for (const middleware of this._middlewares[blockchain]) {
+        await middleware(account)
+      }
+    }
+  }
+
+  /** @private */
+  _registerProtocols (account, { blockchain }) {
+    const protocols = { swap: { }, bridge: { }, lending: { } }
+
+    account.registerProtocol = (label, Protocol, config) => {
+      if (Protocol.prototype instanceof SwapProtocol) {
+        protocols.swap[label] = new Protocol(account, config)
+      } else if (Protocol.prototype instanceof BridgeProtocol) {
+        protocols.bridge[label] = new Protocol(account, config)
+      } else if (Protocol.prototype instanceof LendingProtocol) {
+        protocols.lending[label] = new Protocol(account, config)
+      }
+
+      return account
+    }
+
+    account.getSwapProtocol = (label) => {
+      if (this._protocols.swap[blockchain]?.[label]) {
+        const { Protocol, config } = this._protocols.swap[blockchain][label]
+
+        const protocol = new Protocol(account, config)
+
+        return protocol
+      }
+
+      if (protocols.swap[label]) {
+        return protocols.swap[label]
+      }
+
+      throw new Error(`No swap protocol registered for label: ${label}.`)
+    }
+
+    account.getBridgeProtocol = (label) => {
+      if (this._protocols.bridge[blockchain]?.[label]) {
+        const { Protocol, config } = this._protocols.bridge[blockchain][label]
+
+        const protocol = new Protocol(account, config)
+
+        return protocol
+      }
+
+      if (protocols.bridge[label]) {
+        return protocols.bridge[label]
+      }
+
+      throw new Error(`No bridge protocol registered for label: ${label}.`)
+    }
+
+    account.getLendingProtocol = (label) => {
+      if (this._protocols.lending[blockchain]?.[label]) {
+        const { Protocol, config } = this._protocols.lending[blockchain][label]
+
+        const protocol = new Protocol(account, config)
+
+        return protocol
+      }
+
+      if (protocols.lending[label]) {
+        return protocols.lending[label]
+      }
+
+      throw new Error(`No lending protocol registered for label: ${label}.`)
     }
   }
 }
-
-export default WdkManager

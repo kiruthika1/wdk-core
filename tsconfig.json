@@ -1,5 +1,8 @@
 {
-  "include": ["index.js", "src/**/*.js"],
+  "include": [
+    "index.js",
+    "src/**/*.js",
+  ],
   "compilerOptions": {
     "target": "ES2015",
     "module": "NodeNext",

@@ -14,10 +14,8 @@
 
 'use strict'
 
-/** @typedef {import('./src/wdk-manager.js').IWalletAccount} IWalletAccount */
-/** @typedef {import('./src/wdk-manager.js').FeeRates} FeeRates */
-/** @typedef {import('./src/wdk-manager.js').MiddlewareFunction} MiddlewareFunction */
+import 'bare-wdk-runtime'
 
-/** @typedef {import('./src/wallet-account-with-protocols.js').IWalletAccountWithProtocols} IWalletAccountWithProtocols */
+export * from './index.js' with { imports: 'bare-wdk-runtime/package' }
 
-export { default } from './src/wdk-manager.js'
+export { default } from './index.js' with { imports: 'bare-wdk-runtime/package' }
