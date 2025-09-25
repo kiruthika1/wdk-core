@@ -1,1 +1,1 @@
-# @wdk/core
+# @tetherto/wdk

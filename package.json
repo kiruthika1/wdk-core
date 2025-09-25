@@ -1,8 +1,11 @@
 {
-  "name": "@wdk/core",
+  "name": "@tetherto/wdk",
   "version": "1.0.0-beta.2",
   "description": "A flexible manager that can register and manage multiple wallet instances for different blockchains dynamically.",
-  "keywords": ["wdk", "core"],
+  "keywords": [
+    "wdk",
+    "core"
+  ],
   "author": "Tether",
   "license": "Apache-2.0",
   "repository": {
@@ -20,7 +23,7 @@
     "test:coverage": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage"
   },
   "dependencies": {
-    "@wdk/wallet": "https://github.com/davi0kprogramsthings/wdk-wallet#develop",
+    "@tetherto/wdk-wallet": "^1.0.0-beta.1",
     "bare-wdk-runtime": "2.0.0"
   },
   "devDependencies": {
@@ -38,6 +41,10 @@
     "./package": {
       "default": "./package.json"
     }
+  },
+  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://registry.npmjs.org/"
   },
   "standard": {
     "ignore": [
