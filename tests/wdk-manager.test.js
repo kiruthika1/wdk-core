@@ -1,3 +1,5 @@
+'use strict'
+
 import { beforeEach, describe, expect, jest, test } from '@jest/globals'
 
 import WalletManager from '@tetherto/wdk-wallet'
