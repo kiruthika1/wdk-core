@@ -14,13 +14,13 @@
 
 'use strict'
 
-import { IWalletAccount, NotImplementedError } from '@wdk/wallet'
+import { IWalletAccount, NotImplementedError } from '@tetherto/wdk-wallet'
 
-/** @typedef {import('@wdk/wallet/protocols').ISwapProtocol} ISwapProtocol */
+/** @typedef {import('@tetherto/wdk-wallet/protocols').ISwapProtocol} ISwapProtocol */
 
-/** @typedef {import('@wdk/wallet/protocols').IBridgeProtocol} IBridgeProtocol */
+/** @typedef {import('@tetherto/wdk-wallet/protocols').IBridgeProtocol} IBridgeProtocol */
 
-/** @typedef {import('@wdk/wallet/protocols').ILendingProtocol} ILendingProtocol */
+/** @typedef {import('@tetherto/wdk-wallet/protocols').ILendingProtocol} ILendingProtocol */
 
 /** @interface */
 export class IWalletAccountWithProtocols extends IWalletAccount {

@@ -97,11 +97,11 @@ export default class WdkManager {
     /** @private */
     private _registerProtocols;
 }
-export type IWalletAccount = import("@wdk/wallet").IWalletAccount;
-export type FeeRates = import("@wdk/wallet").FeeRates;
+export type IWalletAccount = import("@tetherto/wdk-wallet").IWalletAccount;
+export type FeeRates = import("@tetherto/wdk-wallet").FeeRates;
 export type IWalletAccountWithProtocols = import("./wallet-account-with-protocols.js").IWalletAccountWithProtocols;
 export type MiddlewareFunction = <A extends IWalletAccount>(account: A) => Promise<void>;
-import WalletManager from "@wdk/wallet";
-import { SwapProtocol } from "@wdk/wallet/protocols";
-import { BridgeProtocol } from "@wdk/wallet/protocols";
-import { LendingProtocol } from "@wdk/wallet/protocols";
+import WalletManager from "@tetherto/wdk-wallet";
+import { SwapProtocol } from "@tetherto/wdk-wallet/protocols";
+import { BridgeProtocol } from "@tetherto/wdk-wallet/protocols";
+import { LendingProtocol } from "@tetherto/wdk-wallet/protocols";

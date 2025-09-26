@@ -38,8 +38,8 @@ export interface IWalletAccountWithProtocols extends IWalletAccount {
      */
     getLendingProtocol(label: string): ILendingProtocol;
 }
-export type ISwapProtocol = import("@wdk/wallet/protocols").ISwapProtocol;
-export type IBridgeProtocol = import("@wdk/wallet/protocols").IBridgeProtocol;
-export type ILendingProtocol = import("@wdk/wallet/protocols").ILendingProtocol;
-import { IWalletAccount } from "@wdk/wallet";
-import { SwapProtocol, BridgeProtocol, LendingProtocol } from "@wdk/wallet/protocols";
+export type ISwapProtocol = import("@tetherto/wdk-wallet/protocols").ISwapProtocol;
+export type IBridgeProtocol = import("@tetherto/wdk-wallet/protocols").IBridgeProtocol;
+export type ILendingProtocol = import("@tetherto/wdk-wallet/protocols").ILendingProtocol;
+import { IWalletAccount } from "@tetherto/wdk-wallet";
+import { SwapProtocol, BridgeProtocol, LendingProtocol } from "@tetherto/wdk-wallet/protocols";

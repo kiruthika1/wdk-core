@@ -14,27 +14,27 @@
 
 'use strict'
 
-import WalletManager from '@wdk/wallet'
+import WalletManager from '@tetherto/wdk-wallet'
 
-import { SwapProtocol, BridgeProtocol, LendingProtocol } from '@wdk/wallet/protocols'
+import { SwapProtocol, BridgeProtocol, LendingProtocol } from '@tetherto/wdk-wallet/protocols'
 
-/** @typedef {import('@wdk/wallet').IWalletAccount} IWalletAccount */
+/** @typedef {import('@tetherto/wdk-wallet').IWalletAccount} IWalletAccount */
 
-/** @typedef {import('@wdk/wallet').FeeRates} FeeRates */
+/** @typedef {import('@tetherto/wdk-wallet').FeeRates} FeeRates */
 
 /** @typedef {import('./wallet-account-with-protocols.js').IWalletAccountWithProtocols} IWalletAccountWithProtocols */
 
 /** @typedef {<A extends IWalletAccount>(account: A) => Promise<void>} MiddlewareFunction */
 
-export default class WdkManager {
+export default class WDK {
   /**
-   * Creates a new wallet development kit manager.
+   * Creates a new wallet development kit instance.
    *
    * @param {string | Uint8Array} seed - The wallet's BIP-39 seed phrase.
    * @throws {Error} If the seed is not valid.
    */
   constructor (seed) {
-    if (!WdkManager.isValidSeed(seed)) {
+    if (!WDK.isValidSeed(seed)) {
       throw new Error('Invalid seed.')
     }
 
@@ -75,13 +75,13 @@ export default class WdkManager {
   }
 
   /**
-   * Registers a new wallet to the wdk manager.
+   * Registers a new wallet to WDK.
    *
    * @template {typeof WalletManager} W
    * @param {string} blockchain - The name of the blockchain the wallet must be bound to. Can be any string (e.g., "ethereum").
    * @param {W} WalletManager - The wallet manager class.
    * @param {ConstructorParameters<W>[1]} config - The configuration object.
-   * @returns {WdkManager} The wdk manager.
+   * @returns {WDK} The wdk instance.
    */
   registerWallet (blockchain, WalletManager, config) {
     const wallet = new WalletManager(this._seed, config)
@@ -92,7 +92,7 @@ export default class WdkManager {
   }
 
   /**
-   * Registers a new protocol to the wdk manager.
+   * Registers a new protocol to WDK.
    *
    * The label must be unique in the scope of the blockchain and the type of protocol (i.e., there can't be two protocols of the
    * same type bound to the same blockchain with the same label).
@@ -103,7 +103,7 @@ export default class WdkManager {
    * @param {string} label - The label.
    * @param {P} Protocol - The protocol class.
    * @param {ConstructorParameters<P>[1]} config - The protocol configuration.
-   * @returns {WdkManager} The wdk manager.
+   * @returns {WDK} The wdk instance.
    */
   registerProtocol (blockchain, label, Protocol, config) {
     if (Protocol.prototype instanceof SwapProtocol) {
@@ -124,13 +124,13 @@ export default class WdkManager {
   }
 
   /**
-   * Registers a new middleware to the wdk manager.
+   * Registers a new middleware to WDK.
    *
    * It's possible to register multiple middlewares for the same blockchain, which will be called sequentially.
    *
    * @param {string} blockchain - The name of the blockchain the middleware must be bound to. Can be any string (e.g., "ethereum").
    * @param {MiddlewareFunction} middleware - A callback function that is called each time the user derives a new account.
-   * @returns {WdkManager} The wdk manager.
+   * @returns {WDK} The wdk instance.
    */
   registerMiddleware (blockchain, middleware) {
     this._middlewares[blockchain] ??= []

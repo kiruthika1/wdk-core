@@ -1,8 +1,10 @@
+'use strict'
+
 import { beforeEach, describe, expect, jest, test } from '@jest/globals'
 
-import WalletManager from '@wdk/wallet'
+import WalletManager from '@tetherto/wdk-wallet'
 
-import { BridgeProtocol, LendingProtocol, SwapProtocol } from '@wdk/wallet/protocols'
+import { BridgeProtocol, LendingProtocol, SwapProtocol } from '@tetherto/wdk-wallet/protocols'
 
 import WdkManager from '../index.js'
 
