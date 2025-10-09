@@ -111,7 +111,7 @@ Works with a basic wallet account but adds service management:
 
 ### Add Many Blockchains
 ```typescript
-const wdk = new WDK(seed) //seed are your twelve word phrase
+const wdk = new WDK(seed) //seed is your twelve word phrase
   .registerWallet('ethereum', WalletManagerEvm, ethereumWalletConfig)
   .registerWallet('arbitrum', WalletManagerEvm, arbitrumWalletConfig)
   .registerWallet('ton', WalletManagerTon, tonWalletConfig)
