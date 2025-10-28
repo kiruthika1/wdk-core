@@ -24,13 +24,18 @@
   },
   "dependencies": {
     "@tetherto/wdk-wallet": "^1.0.0-beta.1",
-    "bare-wdk-runtime": "2.0.0"
+    "bare-wdk-runtime": "2.0.0",
+    "@tetherto/wdk-core": "file:.",
+    "@tetherto/wdk-wallet-btc": "file:../wdk-wallet-btc",
+    "@tetherto/wdk-wallet-evm": "file:../wdk-wallet-evm",
+    "bip39": "^3.0.4"
   },
   "devDependencies": {
     "cross-env": "7.0.3",
     "jest": "30.1.3",
     "standard": "17.1.2",
-    "typescript": "5.8.3"
+    "typescript": "5.8.3",
+    "dotenv": "^16.0.0"
   },
   "exports": {
     ".": {
