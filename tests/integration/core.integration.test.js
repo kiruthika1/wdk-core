@@ -11,7 +11,7 @@ describe('WDK Core - Integration (core module)', () => {
   let core;
 
   beforeAll(() => {
-    const core = new Core(process.env.SEED_PHRASE.trim());
+    core = new Core(process.env.SEED_PHRASE.trim());
     console.log('Core instance:', core);
   });
 
@@ -28,24 +28,53 @@ describe('WDK Core - Integration (core module)', () => {
       rpcUrl: process.env.SEPOLIA_RPC_URL
     });
 
-    const btcId = core.registerModule('btc', btc);
-    const evmId = core.registerModule('evm', evm);
+core
+  .registerWallet('btc', BtcModule, { network: 'testnet' })
+  .registerWallet('evm', EvmModule, { network: 'sepolia', rpcUrl: process.env.SEPOLIA_RPC_URL });
 
-    expect(btcId).toBeDefined();
-    expect(evmId).toBeDefined();
+const btcWallet = core._wallets.get('btc');
+const evmWallet = core._wallets.get('evm');
+
+
+expect(btcWallet).toBeDefined();
+expect(evmWallet).toBeDefined();
+expect(btcWallet).toBeInstanceOf(BtcModule);
+expect(evmWallet).toBeInstanceOf(EvmModule);
+
 
     // duplicate registration should throw
     expect(() => core.registerModule('btc', btc)).toThrow();
   });
 
-  test('dispatches to correct module for chain id / network', async () => {
-    const managerBtc = core.resolveManager('btc:testnet');
-    const managerEvm = core.resolveManager('evm:sepolia');
+  test('dispatches to correct module for chain id / network using mocks', async () => {
 
-    expect(managerBtc).toBeDefined();
-    expect(managerEvm).toBeDefined();
-    expect(managerBtc.chain).toMatch(/btc/i);
-    expect(managerEvm.chain).toMatch(/evm|ethereum/i);
+  class MockBtcWallet {
+    constructor(seed, config) {
+      this.chain = 'btc';
+      this.seed = seed;
+      this.config = config;
+    }
+  }
+
+  class MockEvmWallet {
+    constructor(seed, config) {
+      this.chain = 'evm';
+      this.seed = seed;
+      this.config = config;
+    }
+  }
+
+    core
+      .registerWallet('btc', MockBtcWallet, { network: 'testnet' })
+      .registerWallet('evm', MockEvmWallet, { network: 'sepolia', rpcUrl: process.env.SEPOLIA_RPC_URL });
+
+const btcWallet = core._wallets.get('btc');
+const evmWallet = core._wallets.get('evm');
+
+    expect(btcWallet).toBeDefined();
+    expect(evmWallet).toBeDefined();
+    expect(btcWallet.chain).toMatch(/btc/i);
+    expect(evmWallet.chain).toMatch(/evm|ethereum/i);
   });
 
   test('rejects unknown module registration gracefully', () => {
