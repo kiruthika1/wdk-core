@@ -1,0 +1,35 @@
+name: WDK Integration Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run integration tests
+        env:
+          SEED_PHRASE: ${{ secrets.SEED_PHRASE }}
+          TEST_MNEMONIC: ${{ secrets.TEST_MNEMONIC }}
+          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+          BTC_TESTNET_RPC_URL: ${{ secrets.BTC_TESTNET_RPC_URL }}
+          CI_ALLOW_TX: false
+        run: |
+          if [[ -z "$SEED_PHRASE" || -z "$TEST_MNEMONIC" ]]; then
+            echo "⚠️ Required secrets missing, skipping integration tests."
+          else
+            npm test
