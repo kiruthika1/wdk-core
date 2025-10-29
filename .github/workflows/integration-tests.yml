@@ -33,3 +33,4 @@ jobs:
             echo "⚠️ Required secrets missing, skipping integration tests."
           else
             npm test
+          fi
