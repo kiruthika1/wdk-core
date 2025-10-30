@@ -25,11 +25,13 @@ describe('WDK - BTC module integration', () => {
    // console.log('🔍 BTC Wallet instance:', btcWallet);
   });
 
+  afterAll(async () => {
+    if (btcWallet && btcWallet.shutdown) await btcWallet.shutdown();
+  });
+
   test('initializes BTC wallet successfully', () => {
     expect(btcWallet).toBeDefined();
     expect(typeof btcWallet).toBe('object');
-
-
 
     // Directly access _config (private field)
       const config = btcWallet._config;
@@ -73,6 +75,16 @@ describe('WDK - BTC module integration', () => {
   });
 
 test('queries BTC balance (likely 0 for new mnemonic)', async () => {
+
+if (process.env.CI) {
+  global.fetch = jest.fn(() =>
+    Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({ chain_stats: { funded_txo_sum: 0, spent_txo_sum: 0 } }),
+    })
+  );
+}
+
   expect(btcWallet).toBeDefined();
 
   // 1️⃣ Derive default account
