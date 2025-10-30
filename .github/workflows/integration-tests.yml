@@ -35,9 +35,10 @@ jobs:
             npm test
           fi
 
-      - name: Upload Jest JUnit Report
+      - name: Upload JUnit test report to GitHub
           if: always()
-          uses: actions/upload-artifact@v3
+          uses: actions/upload-test-report@v3
           with:
-            name: jest-junit-report
-            path: reports/junit/js-test-results.xml
+            test-results-files: reports/junit/js-test-results.xml
+            merge-test-results: true
+            name: Integration Test Report
