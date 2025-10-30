@@ -4,6 +4,8 @@ dotenv.config();
 import Core from '@tetherto/wdk-core';
 import WDK from '@tetherto/wdk-core';
 import BtcModule from '@tetherto/wdk-wallet-btc';
+import { jest } from '@jest/globals';
+
 
 const MNEMONIC = process.env.TEST_MNEMONIC;
 const BTC_RPC_URL = process.env.BTC_TESTNET_RPC_URL || 'https://example.testnet.node';
