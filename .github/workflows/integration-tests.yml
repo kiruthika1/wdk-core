@@ -39,6 +39,5 @@ jobs:
           if: always()
           uses: actions/upload-test-report@v3
           with:
-            test-results-files: reports/junit/js-test-results.xml
-            merge-test-results: true
             name: Integration Test Report
+            path: reports/junit/js-test-results.xml
