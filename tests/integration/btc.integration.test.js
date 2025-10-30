@@ -42,7 +42,7 @@ describe('WDK - BTC module integration', () => {
       // Assert the network
       expect(config.network).toMatch(/testnet/i);
 
-      // Optional: assert rpcUrl exists too
+      // Assert rpcUrl exists
       expect(config.rpcUrl).toBeDefined();
 
       console.log('BTC Wallet config:', config);
@@ -54,13 +54,12 @@ describe('WDK - BTC module integration', () => {
     expect(btcWallet).toBeDefined();
     expect(typeof btcWallet).toBe('object');
 
-    // 1️⃣ Derive the default account using getAccount()
+    // Derive the default account using getAccount()
     const account = await btcWallet.getAccount();
     expect(account).toBeDefined();
 
-    // 2️⃣ Extract the address string
-    // Depending on implementation, address might be in account.address or account.__address
-    const address =
+    // Extract the address string
+      const address =
       account?.address ||
       account?.__address ||
       account?.pubkey; // fallback if needed
@@ -68,7 +67,7 @@ describe('WDK - BTC module integration', () => {
     expect(address).toBeDefined();
     expect(typeof address).toBe('string');
 
-    // 3️⃣ Optional: check address format for testnet (starts with m or n, or bech32 prefix tb1)
+    // Check address format for testnet (starts with m or n, or bech32 prefix tb1)
     const isValidTestnetAddress =
       /^([mn][1-9A-HJ-NP-Za-km-z]{25,34}|tb1[a-z0-9]{39,59})$/.test(address);
     expect(isValidTestnetAddress).toBe(true);
@@ -89,13 +88,13 @@ if (process.env.CI) {
 
   expect(btcWallet).toBeDefined();
 
-  // 1️⃣ Derive default account
+  // Derive default account
   const account = await btcWallet.getAccount();
   const address = account?.address || account?.__address || account?.pubkey;
   expect(address).toBeDefined();
   expect(typeof address).toBe('string');
 
-  // 2️⃣ Query testnet balance using Blockstream API
+  // Query testnet balance using Blockstream API
   const url = `https://blockstream.info/testnet/api/address/${address}`;
   const response = await fetch(url);
   expect(response.ok).toBe(true);
