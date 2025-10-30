@@ -34,3 +34,10 @@ jobs:
           else
             npm test
           fi
+
+      - name: Upload Jest JUnit Report
+          if: always()
+          uses: actions/upload-artifact@v3
+          with:
+            name: jest-junit-report
+            path: reports/junit/js-test-results.xml
