@@ -17,7 +17,7 @@ describe('WDK Core - Integration (core module)', () => {
       }
 
     core = new Core(process.env.SEED_PHRASE.trim());
-    console.log('Core instance:', core);
+
   });
 
   afterAll(async () => {

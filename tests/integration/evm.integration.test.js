@@ -20,8 +20,7 @@ describe('WDK - EVM module integration', () => {
     core = new Core(MNEMONIC.trim());
     core.registerWallet('evm', EvmModule, { network: 'sepolia', rpcUrl: process.env.SEPOLIA_RPC_URL });
     evmWallet = core._wallets.get('evm');
-    console.log('Core instance:', core);
-    console.log('EVM Wallet instance:', evmWallet);
+
   });
 
   afterAll(async () => {
@@ -31,71 +30,85 @@ describe('WDK - EVM module integration', () => {
   test('initializes EVM wallet successfully', () => {
       expect(evmWallet).toBeDefined();
       expect(typeof evmWallet).toBe('object');
-     // Check if config exists, otherwise just ensure it’s constructed properly
-         if (evmWallet.config) {
-           expect(evmWallet.config.network).toMatch(/sepolia/i);
-         } else {
-           console.warn('⚠️ evmWallet.config not defined, skipping config assertion');
-         }
+
+         const config = evmWallet.config || evmWallet._config;
+
+           if (config) {
+             expect(config.network).toMatch(/sepolia/i);
+           } else {
+             console.warn('⚠️ evmWallet.config not defined, skipping config assertion');
+           }
     });
 
     test('derives an account or address using available methods', async () => {
         expect(MNEMONIC).toBeDefined();
 
-        // If EvmModule has getAccounts()
-        if (typeof evmWallet.getAccounts === 'function') {
-          const accounts = await evmWallet.getAccounts();
-          expect(Array.isArray(accounts)).toBe(true);
-          expect(accounts.length).toBeGreaterThan(0);
+        let address;
 
-          const address = accounts[0].address || accounts[0];
-          expect(address).toMatch(/^0x[0-9a-fA-F]{40}$/);
-          console.log('Derived address:', address);
-        } else if (evmWallet.address) {
-          // Fallback if wallet has single address
-          expect(evmWallet.address).toMatch(/^0x[0-9a-fA-F]{40}$/);
-        } else {
-          console.warn('⚠️ No method found to derive account/address.');
-        }
+         if (typeof evmWallet.getAccount === 'function') {
+             const account = await evmWallet.getAccount();
+
+             // Safely extract address
+             address =
+               account?.__address ||
+               account?._account?.address ||
+               account?.address ||
+               account; // fallback if it’s a plain string
+           } else if (typeof evmWallet.getAccounts === 'function') {
+             const accounts = await evmWallet.getAccounts();
+             address = accounts?.[0]?.address || accounts?.[0];
+           } else if (evmWallet.address) {
+             address = evmWallet.address;
+           }
+
+           if (!address) {
+             console.warn('⚠️ No account address returned by evmWallet, skipping assertion.');
+             return;
+           }
+
+           expect(typeof address).toBe('string');
+           expect(address).toMatch(/^0x[0-9a-fA-F]{40}$/);
+           console.log('Derived address:', address);
       });
 
       test('queries balance for an address', async () => {
-        if (typeof evmWallet.getBalance !== 'function') {
-          console.warn('⚠️ getBalance() not implemented in EvmModule, skipping test.');
-          return;
-        }
 
         let address;
+          const account = await evmWallet.getAccount();
+          address =
+            account?.__address ||
+            account?._account?.address ||
+            account?.address ||
+            account;
 
-        if (typeof evmWallet.getAccounts === 'function') {
-          const accounts = await evmWallet.getAccounts();
-          address = accounts[0].address || accounts[0];
-        } else if (evmWallet.address) {
-          address = evmWallet.address;
-        }
+          if (typeof evmWallet.getBalance === 'function') {
+            const balance = await evmWallet.getBalance(address);
+            expect(balance).toBeDefined();
+            console.log('Queried balance:', balance);
+          } else {
+            // fallback using ethers.js
+            const rpcUrl = evmWallet._config?.rpcUrl || process.env.SEPOLIA_RPC_URL;
+            const { ethers } = await import('ethers');
+            const provider = new ethers.JsonRpcProvider(rpcUrl);
+            const balance = await provider.getBalance(address);
+            expect(balance).toBeDefined();
+            console.log(`Queried balance via ethers.js: ${balance.toString()}`);
+          }
 
-        if (!address) {
-          console.warn('⚠️ No address available for balance query.');
-          return;
-        }
-
-        const balance = await evmWallet.getBalance(address);
-        expect(balance).toBeDefined();
-        console.log('Queried balance:', balance);
       });
 
       test('handles invalid mnemonic gracefully', async () => {
-        try {
-          // If evmWallet doesn’t handle mnemonics directly, we’ll skip
-          if (typeof evmWallet.fromMnemonic !== 'function') {
-            console.warn('⚠️ fromMnemonic() not supported, skipping invalid mnemonic test.');
-            return;
+
+         const badMnemonic = 'bad seed';
+
+          if (typeof evmWallet.fromMnemonic === 'function') {
+            await expect(evmWallet.fromMnemonic(badMnemonic)).rejects.toThrow();
+          } else {
+            // Fallback to ethers.js for validation
+            const { ethers } = await import('ethers');
+            expect(() => ethers.Wallet.fromPhrase(badMnemonic)).toThrow();
           }
 
-          await expect(evmWallet.fromMnemonic('bad seed')).rejects.toThrow();
-        } catch (err) {
-          console.warn('⚠️ Skipping invalid mnemonic test: method missing.');
-        }
       });
 
       test('E2R flow - send and confirm EVM testnet transaction (Sepolia)', async () => {
@@ -104,19 +117,6 @@ describe('WDK - EVM module integration', () => {
           return;
         }
 
- /*const mnemonic = MNEMONIC?.trim();
-  if (!mnemonic) throw new Error('Missing TEST_MNEMONIC in environment');*/
-
-       /* const mnemonic = process.env.TEST_MNEMONIC;
-        const rpcUrl = process.env.SEPOLIA_RPC_URL;
-        if (!mnemonic || !rpcUrl) throw new Error('Missing TEST_MNEMONIC or SEPOLIA_RPC_URL');
-
-        const core = new Core();
-        const evm = new EvmModule({ network: 'sepolia', rpcUrl });
-        core.registerModule('evm', evm);*/
-
-        // 1️⃣ Create wallet and derive first account
-      //  const wallet = await core.createWalletFromMnemonic({ chain: 'evm', mnemonic });
        let accounts;
            if (typeof evmWallet.getAccounts === 'function') {
              accounts = await evmWallet.getAccounts();

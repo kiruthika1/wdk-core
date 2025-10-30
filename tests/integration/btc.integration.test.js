@@ -22,60 +22,78 @@ describe('WDK - BTC module integration', () => {
     });
 
     btcWallet = core._wallets.get('btc');
-    console.log('🔍 BTC Wallet instance:', btcWallet);
+   // console.log('🔍 BTC Wallet instance:', btcWallet);
   });
 
   test('initializes BTC wallet successfully', () => {
     expect(btcWallet).toBeDefined();
     expect(typeof btcWallet).toBe('object');
 
-    if (btcWallet.config) {
-      expect(btcWallet.config.network).toMatch(/testnet/i);
-    } else {
-      console.warn('⚠️ btcWallet.config not defined, skipping config check.');
-    }
+
+
+    // Directly access _config (private field)
+      const config = btcWallet._config;
+      expect(config).toBeDefined();
+
+      // Assert the network
+      expect(config.network).toMatch(/testnet/i);
+
+      // Optional: assert rpcUrl exists too
+      expect(config.rpcUrl).toBeDefined();
+
+      console.log('BTC Wallet config:', config);
   });
 
-  test('derives a receive address using wallet methods', async () => {
-    expect(MNEMONIC).toBeDefined();
 
-    if (typeof btcWallet.getAccounts === 'function') {
-      const accounts = await btcWallet.getAccounts();
-      expect(Array.isArray(accounts)).toBe(true);
-      expect(accounts.length).toBeGreaterThan(0);
 
-      const addr = accounts[0].receiveAddress || accounts[0].address || accounts[0];
-      expect(typeof addr).toBe('string');
-      expect(addr).toMatch(/^(tb1|m|n)[a-zA-HJ-NP-Z0-9]{20,}/);
-      console.log('Derived BTC testnet address:', addr);
-    } else {
-      console.warn('⚠️ getAccounts() not implemented, skipping account derivation test.');
-    }
+  test('derives a BTC testnet account/address', async () => {
+    expect(btcWallet).toBeDefined();
+    expect(typeof btcWallet).toBe('object');
+
+    // 1️⃣ Derive the default account using getAccount()
+    const account = await btcWallet.getAccount();
+    expect(account).toBeDefined();
+
+    // 2️⃣ Extract the address string
+    // Depending on implementation, address might be in account.address or account.__address
+    const address =
+      account?.address ||
+      account?.__address ||
+      account?.pubkey; // fallback if needed
+
+    expect(address).toBeDefined();
+    expect(typeof address).toBe('string');
+
+    // 3️⃣ Optional: check address format for testnet (starts with m or n, or bech32 prefix tb1)
+    const isValidTestnetAddress =
+      /^([mn][1-9A-HJ-NP-Za-km-z]{25,34}|tb1[a-z0-9]{39,59})$/.test(address);
+    expect(isValidTestnetAddress).toBe(true);
+
+    console.log('Derived BTC testnet address:', address);
   });
 
-  test('queries BTC balance (likely 0 for new mnemonic)', async () => {
-    if (typeof btcWallet.getBalance !== 'function') {
-      console.warn('⚠️ getBalance() not implemented, skipping balance test.');
-      return;
-    }
+test('queries BTC balance (likely 0 for new mnemonic)', async () => {
+  expect(btcWallet).toBeDefined();
 
-    let address;
-    if (typeof btcWallet.getAccounts === 'function') {
-      const accounts = await btcWallet.getAccounts();
-      address = accounts[0].receiveAddress || accounts[0].address || accounts[0];
-    } else if (btcWallet.address) {
-      address = btcWallet.address;
-    }
+  // 1️⃣ Derive default account
+  const account = await btcWallet.getAccount();
+  const address = account?.address || account?.__address || account?.pubkey;
+  expect(address).toBeDefined();
+  expect(typeof address).toBe('string');
 
-    if (!address) {
-      console.warn('⚠️ No BTC address found for balance check.');
-      return;
-    }
+  // 2️⃣ Query testnet balance using Blockstream API
+  const url = `https://blockstream.info/testnet/api/address/${address}`;
+  const response = await fetch(url);
+  expect(response.ok).toBe(true);
 
-    const balance = await btcWallet.getBalance(address);
-    expect(balance).toBeDefined();
-    console.log('Queried BTC testnet balance:', balance);
-  });
+  const data = await response.json();
+  expect(data).toBeDefined();
+
+  const balance = data.chain_stats?.funded_txo_sum - data.chain_stats?.spent_txo_sum || 0;
+  console.log(`BTC testnet balance for ${address}:`, balance);
+
+  expect(balance).not.toBeUndefined();
+});
 
  test('handles invalid network option gracefully', async () => {
    const bad = new BtcModule({ network: 'mainnet-please-no' });
